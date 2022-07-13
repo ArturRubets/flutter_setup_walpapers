@@ -24,7 +24,7 @@ class WallhavenApiClient {
         'page': page.toString(),
       },
     );
-    
+
     final response = await _httpClient.get(request);
 
     if (response.statusCode != 200) {

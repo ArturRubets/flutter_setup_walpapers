@@ -18,7 +18,7 @@ class WallpaperResponse {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Wallpaper {
-  Wallpaper({
+  const Wallpaper({
     required this.id,
     required this.url,
     required this.shortUrl,
@@ -66,7 +66,7 @@ class Wallpaper {
 
 @JsonSerializable()
 class Thumbs {
-  Thumbs({
+  const Thumbs({
     required this.large,
     required this.original,
     required this.small,
@@ -106,7 +106,7 @@ class Meta {
 
 @JsonSerializable()
 class Query {
-  Query();
+  const Query();
 
   factory Query.fromJson(Map<String, dynamic> json) => _$QueryFromJson(json);
 
@@ -115,7 +115,7 @@ class Query {
 
 @JsonSerializable()
 class Seed {
-  Seed();
+  const Seed();
 
   factory Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
 

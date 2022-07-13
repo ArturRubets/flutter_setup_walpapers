@@ -1,47 +1,39 @@
-// import 'dart:async';
+import '../../../../data/api/wallhaven_api/wallhaven_api.dart';
+import 'models/models.dart';
 
-// import 'package:meta_weather_api/meta_weather_api.dart' hide Weather;
-// import 'package:weather_repository/weather_repository.dart';
+class WallhavenRepository {
+  WallhavenRepository({WallhavenApiClient? wallhavenApiClient})
+      : _wallhavenApiClient = wallhavenApiClient ?? WallhavenApiClient();
 
-// class WeatherFailure implements Exception {}
+  final WallhavenApiClient _wallhavenApiClient;
 
-// class WeatherRepository {
-//   WeatherRepository({MetaWeatherApiClient? weatherApiClient})
-//       : _weatherApiClient = weatherApiClient ?? MetaWeatherApiClient();
+  Future<WallpaperResponse> getWallpaper(int page) async {
+    final wallpaperApiResponse = await _wallhavenApiClient.wallpaper(
+      page,
+      Configuration.apiKey,
+    );
+    final data = wallpaperApiResponse.data.map((w) {
+      return Wallpaper(
+        favorites: w.favorites,
+        category: w.category,
+        resolution: w.resolution,
+        fileSize: w.fileSize,
+        fileType: w.fileType,
+        createdAt: w.createdAt,
+        path: w.path,
+        thumbs: Thumbs(
+          large: w.thumbs.large,
+          original: w.thumbs.large,
+          small: w.thumbs.small,
+        ),
+      );
+    }).toList();
 
-//   final MetaWeatherApiClient _weatherApiClient;
+    final meta = Meta(
+      currentPage: wallpaperApiResponse.meta.currentPage,
+      lastPage: wallpaperApiResponse.meta.lastPage,
+    );
 
-//   Future<Weather> getWeather(String city) async {
-//     final location = await _weatherApiClient.locationSearch(city);
-//     final woeid = location.woeid;
-//     final weather = await _weatherApiClient.getWeather(woeid);
-//     return Weather(
-//       temperature: weather.theTemp,
-//       location: location.title,
-//       condition: weather.weatherStateAbbr.toCondition,
-//     );
-//   }
-// }
-
-// extension on WeatherState {
-//   WeatherCondition get toCondition {
-//     switch (this) {
-//       case WeatherState.clear:
-//         return WeatherCondition.clear;
-//       case WeatherState.snow:
-//       case WeatherState.sleet:
-//       case WeatherState.hail:
-//         return WeatherCondition.snowy;
-//       case WeatherState.thunderstorm:
-//       case WeatherState.heavyRain:
-//       case WeatherState.lightRain:
-//       case WeatherState.showers:
-//         return WeatherCondition.rainy;
-//       case WeatherState.heavyCloud:
-//       case WeatherState.lightCloud:
-//         return WeatherCondition.cloudy;
-//       default:
-//         return WeatherCondition.unknown;
-//     }
-//   }
-// }
+    return WallpaperResponse(data: data, meta: meta);
+  }
+}
