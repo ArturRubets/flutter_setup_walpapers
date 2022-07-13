@@ -1,8 +1,8 @@
 import '../../../../data/api/wallhaven_api/wallhaven_api.dart';
 import 'models/models.dart';
 
-class WallhavenRepository {
-  WallhavenRepository({WallhavenApiClient? wallhavenApiClient})
+class WallpaperRepository {
+  WallpaperRepository({WallhavenApiClient? wallhavenApiClient})
       : _wallhavenApiClient = wallhavenApiClient ?? WallhavenApiClient();
 
   final WallhavenApiClient _wallhavenApiClient;
