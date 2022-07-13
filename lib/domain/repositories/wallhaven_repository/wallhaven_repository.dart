@@ -1,0 +1,1 @@
+export 'src/wallhaven_repository.dart';

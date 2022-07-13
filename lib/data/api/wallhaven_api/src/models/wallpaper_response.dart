@@ -4,40 +4,20 @@ part 'wallpaper_response.g.dart';
 
 @JsonSerializable()
 class WallpaperResponse {
-  final List<Wallpaper> data;
-  final Meta meta;
+  factory WallpaperResponse.fromJson(Map<String, dynamic> json) =>
+      _$WallpaperResponseFromJson(json);
 
   const WallpaperResponse({
     required this.data,
     required this.meta,
   });
-
-  factory WallpaperResponse.fromJson(Map<String, dynamic> json) =>
-      _$WallpaperResponseFromJson(json);
+  final List<Wallpaper> data;
+  final Meta meta;
   Map<String, dynamic> toJson() => _$WallpaperResponseToJson(this);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Wallpaper {
-  final String id;
-  final String url;
-  final String shortUrl;
-  final int views;
-  final int favorites;
-  final String source;
-  final String purity;
-  final String category;
-  final int dimensionX;
-  final int dimensionY;
-  final String resolution;
-  final String ratio;
-  final int fileSize;
-  final String fileType;
-  final String createdAt;
-  final List<String> colors;
-  final String path;
-  final Thumbs thumbs;
-
   Wallpaper({
     required this.id,
     required this.url,
@@ -61,15 +41,31 @@ class Wallpaper {
 
   factory Wallpaper.fromJson(Map<String, dynamic> json) =>
       _$WallpaperFromJson(json);
+
+  final String id;
+  final String url;
+  final String shortUrl;
+  final int views;
+  final int favorites;
+  final String source;
+  final String purity;
+  final String category;
+  final int dimensionX;
+  final int dimensionY;
+  final String resolution;
+  final String ratio;
+  final int fileSize;
+  final String fileType;
+  final String createdAt;
+  final List<String> colors;
+  final String path;
+  final Thumbs thumbs;
+
   Map<String, dynamic> toJson() => _$WallpaperToJson(this);
 }
 
 @JsonSerializable()
 class Thumbs {
-  final String large;
-  final String original;
-  final String small;
-
   Thumbs({
     required this.large,
     required this.original,
@@ -77,18 +73,16 @@ class Thumbs {
   });
 
   factory Thumbs.fromJson(Map<String, dynamic> json) => _$ThumbsFromJson(json);
+
+  final String large;
+  final String original;
+  final String small;
+
   Map<String, dynamic> toJson() => _$ThumbsToJson(this);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Meta {
-  final int currentPage;
-  final int lastPage;
-  final String perPage;
-  final int total;
-  final Query query;
-  final Seed seed;
-
   const Meta({
     required this.currentPage,
     required this.lastPage,
@@ -99,6 +93,14 @@ class Meta {
   });
 
   factory Meta.fromJson(Map<String, dynamic> json) => _$MetaFromJson(json);
+
+  final int currentPage;
+  final int lastPage;
+  final String perPage;
+  final int total;
+  final Query? query;
+  final Seed? seed;
+
   Map<String, dynamic> toJson() => _$MetaToJson(this);
 }
 
@@ -107,6 +109,7 @@ class Query {
   Query();
 
   factory Query.fromJson(Map<String, dynamic> json) => _$QueryFromJson(json);
+
   Map<String, dynamic> toJson() => _$QueryToJson(this);
 }
 
@@ -115,5 +118,6 @@ class Seed {
   Seed();
 
   factory Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
+
   Map<String, dynamic> toJson() => _$SeedToJson(this);
 }

@@ -80,8 +80,12 @@ Meta _$MetaFromJson(Map<String, dynamic> json) => Meta(
       lastPage: json['last_page'] as int,
       perPage: json['per_page'] as String,
       total: json['total'] as int,
-      query: Query.fromJson(json['query'] as Map<String, dynamic>),
-      seed: Seed.fromJson(json['seed'] as Map<String, dynamic>),
+      query: json['query'] == null
+          ? null
+          : Query.fromJson(json['query'] as Map<String, dynamic>),
+      seed: json['seed'] == null
+          ? null
+          : Seed.fromJson(json['seed'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MetaToJson(Meta instance) => <String, dynamic>{
