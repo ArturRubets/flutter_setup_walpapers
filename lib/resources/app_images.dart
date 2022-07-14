@@ -4,4 +4,5 @@ abstract class AppImages {
   static const String expand = 'assets/images/expand.png';
   static const String horizontalMode = 'assets/images/horizontalMode.png';
   static const String verticalMode = 'assets/images/verticalMode.png';
+  static const String heart = 'assets/images/heart.png';
 }
