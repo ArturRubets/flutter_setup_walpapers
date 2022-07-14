@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'configuration/configuration.dart';
-import 'models/models.dart';
+import 'configuration.dart';
+import 'models/wallpaper_response.dart';
 
 class WallpaperRequestFailure implements Exception {}
 

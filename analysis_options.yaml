@@ -92,3 +92,4 @@ linter:
     - use_super_parameters
     - prefer_relative_imports
     - prefer_function_declarations_over_variables
+    - prefer_int_literals

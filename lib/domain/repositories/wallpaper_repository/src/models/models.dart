@@ -1,1 +1,0 @@
-export 'wallpaper_response.dart';

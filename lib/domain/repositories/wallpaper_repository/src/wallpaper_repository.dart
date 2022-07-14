@@ -1,5 +1,7 @@
-import '../../../../data/api/wallhaven_api/wallhaven_api.dart';
-import 'models/models.dart';
+import '../../../../data/api/wallhaven_api/src/configuration.dart';
+import '../../../../data/api/wallhaven_api/src/wallhaven_api_client.dart';
+import 'models/wallpaper_response.dart';
+
 
 class WallpaperRepository {
   WallpaperRepository({WallhavenApiClient? wallhavenApiClient})

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'domain/repositories/wallpaper_repository/wallpaper_repository.dart';
+import 'domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
 import 'ui/app/app.dart';
 
 void main() async {
