@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../themes/themes.dart';
+import '../../../resources/resources.dart';
 
 class WallpapersOverviewPage extends StatelessWidget {
   const WallpapersOverviewPage({super.key});
@@ -52,19 +52,11 @@ class AppBar extends StatelessWidget {
               children: const [
                 Text(
                   'Wallpapers',
-                  style: ,
+                  style: AppTextStyle.title,
                 ),
                 Text(
                   'Find the best wallpapers for you',
-                  style: TextStyle(
-                    fontFamily: 'Raleway',
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.normal,
-                    fontSize: 12,
-                    height: 20 / 12,
-                    letterSpacing: 12 * 0.03,
-                    color: Color(0xFF252b5c),
-                  ),
+                  style: AppTextStyle.subtitle,
                 ),
               ],
             ),
@@ -75,9 +67,9 @@ class AppBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Color(0xFFF5F4F8),
+                    color: AppColors.greySoft,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   width: 93,
@@ -89,26 +81,26 @@ class AppBar extends StatelessWidget {
                           print("Container was tapped");
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF),
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(100),
                           ),
                           child: Image.asset(
-                            'assets/images/vertical_mode.png',
+                            AppImages.verticalMode,
                           ),
                         ),
                       ),
-                      SizedBox(width: 5),
+                      const SizedBox(width: 5),
                       GestureDetector(
                         onTap: () {
                           print("Container was tapped");
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 6,
                           ),
@@ -116,8 +108,8 @@ class AppBar extends StatelessWidget {
                             borderRadius: BorderRadius.circular(100),
                           ),
                           child: Image.asset(
-                            'assets/images/horizontal_mode.png',
-                            color: Colors.white.withOpacity(0.5),
+                            AppImages.horizontalMode,
+                            color: AppColors.white.withOpacity(0.5),
                             colorBlendMode: BlendMode.modulate,
                           ),
                         ),
