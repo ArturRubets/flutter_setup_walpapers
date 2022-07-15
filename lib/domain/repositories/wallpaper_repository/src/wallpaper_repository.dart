@@ -2,7 +2,6 @@ import '../../../../data/api/wallhaven_api/src/configuration.dart';
 import '../../../../data/api/wallhaven_api/src/wallhaven_api_client.dart';
 import 'models/wallpaper_response.dart';
 
-
 class WallpaperRepository {
   WallpaperRepository({WallhavenApiClient? wallhavenApiClient})
       : _wallhavenApiClient = wallhavenApiClient ?? WallhavenApiClient();
@@ -19,7 +18,7 @@ class WallpaperRepository {
         favorites: w.favorites,
         category: w.category,
         resolution: w.resolution,
-        fileSize: w.fileSize,
+        fileSizeBytes: w.fileSize,
         fileType: w.fileType,
         createdAt: w.createdAt,
         path: w.path,

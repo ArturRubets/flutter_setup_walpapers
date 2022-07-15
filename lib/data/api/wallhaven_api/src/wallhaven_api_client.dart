@@ -22,6 +22,7 @@ class WallhavenApiClient {
       <String, String>{
         'apikey': apiKey,
         'page': page.toString(),
+        'categories': '100',
       },
     );
 

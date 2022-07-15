@@ -3,7 +3,7 @@ class WallpaperResponse {
     required this.data,
     required this.meta,
   });
-  
+
   final List<Wallpaper> data;
   final Meta meta;
 }
@@ -13,7 +13,7 @@ class Wallpaper {
     required this.favorites,
     required this.category,
     required this.resolution,
-    required this.fileSize,
+    required this.fileSizeBytes,
     required this.fileType,
     required this.createdAt,
     required this.path,
@@ -23,7 +23,7 @@ class Wallpaper {
   final int favorites;
   final String category;
   final String resolution;
-  final int fileSize;
+  final int fileSizeBytes;
   final String fileType;
   final String createdAt;
   final String path;

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 import '../../../resources/resources.dart';
+import '../../../utils/convert_from_byte_to_mb.dart';
 
-class Wallpaper extends StatelessWidget {
-  const Wallpaper({super.key});
-
+class WallpaperWidget extends StatelessWidget {
+  const WallpaperWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 160,
-      // height: 203,
       padding: const EdgeInsets.only(
         left: 8,
         top: 8,
@@ -23,46 +23,9 @@ class Wallpaper extends StatelessWidget {
       ),
       child: Column(
         children: const [
-          _WallpaperPhoto(),
+          Expanded(child: _WallpaperPhoto()),
           SizedBox(height: 10),
           _WallpaperSpecificationInfo()
-        ],
-      ),
-    );
-  }
-}
-
-class _WallpaperSpecificationInfo extends StatelessWidget {
-  const _WallpaperSpecificationInfo();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        item(AppImages.expand, '2233x3108'),
-        item(AppImages.downloading, '3.9 MB'),
-      ],
-    );
-  }
-
-  Widget item(String imageAsset, String description) {
-    return Expanded(
-      child: Row(
-        children: [
-          Image.asset(
-            imageAsset,
-            width: 9,
-            height: 9,
-          ),
-          const SizedBox(width: 2),
-          Expanded(
-            child: Text(
-              description,
-              style: AppTextStyle.wallpaperSpecificationInfo,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          ),
         ],
       ),
     );
@@ -74,16 +37,17 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final thumbOriginal =
+        context.select<Wallpaper, String>((w) => w.thumbs.original);
     return Stack(
+      fit: StackFit.expand,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(15),
           child: Container(
-            width: 144,
-            height: 160,
             color: AppColors.grey,
             child: Image.network(
-              'https://th.wallhaven.cc/orig/1k/1k5y51.jpg',
+              thumbOriginal,
               fit: BoxFit.cover,
             ),
           ),
@@ -99,6 +63,9 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favorites = context.select<Wallpaper, int>((w) => w.favorites);
+    final category = context.select<Wallpaper, String>((w) => w.category);
+
     return Positioned(
       left: 8,
       right: 8,
@@ -111,12 +78,12 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
             Row(
               children: [
                 Image.asset(AppImages.heart),
-                const Text('0'),
+                Text('$favorites'),
               ],
             ),
           ),
           const SizedBox(width: 3),
-          item(const Text('anime')),
+          item(Text(category)),
         ],
       ),
     );
@@ -135,6 +102,53 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: content,
+      ),
+    );
+  }
+}
+
+class _WallpaperSpecificationInfo extends StatelessWidget {
+  const _WallpaperSpecificationInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final resolution = context.select<Wallpaper, String>((w) => w.resolution);
+    final fileSizeBytes =
+        context.select<Wallpaper, int>((w) => w.fileSizeBytes);
+    final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
+
+    return Row(
+      children: [
+        item(AppImages.expand, resolution),
+        const SizedBox(width: 10),
+        item(AppImages.downloading, filesizeConverting),
+      ],
+    );
+  }
+
+  Widget item(String imageAsset, String description) {
+    return Expanded(
+      child: Row(
+        children: [
+          Image.asset(
+            imageAsset,
+            width: 9,
+            height: 9,
+          ),
+          const SizedBox(width: 2),
+          Expanded(
+            child: FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                description,
+                style: AppTextStyle.wallpaperSpecificationInfo,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
