@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../resources/resources.dart';
+import '../bloc/wallpapers_bloc.dart';
 
 class AppBarWidget extends StatelessWidget {
   const AppBarWidget({super.key});
@@ -58,6 +60,11 @@ class _ButtonGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayMode = context.select<WallpapersBloc, WallpaperDisplayMode>(
+        (w) => w.state.displayMode);
+    final isGridMode = displayMode == WallpaperDisplayMode.grid;
+    final isListMode = displayMode == WallpaperDisplayMode.list;
+
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Row(
@@ -72,14 +79,24 @@ class _ButtonGroup extends StatelessWidget {
             ),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () {},
-                  child: const _ButtonVerticalMode(),
+                _Button(
+                  isActive: isGridMode,
+                  imageAsset: AppImages.gridMode,
+                  onTap: () {
+                    context
+                        .read<WallpapersBloc>()
+                        .add(WallpaperGridModeSwitched());
+                  },
                 ),
                 const SizedBox(width: 5),
-                GestureDetector(
-                  onTap: () {},
-                  child: const _ButtonHorizontalMode(),
+                _Button(
+                  isActive: isListMode,
+                  imageAsset: AppImages.listMode,
+                  onTap: () {
+                    context
+                        .read<WallpapersBloc>()
+                        .add(WallpaperListModeSwitched());
+                  },
                 ),
               ],
             ),
@@ -90,44 +107,35 @@ class _ButtonGroup extends StatelessWidget {
   }
 }
 
-class _ButtonHorizontalMode extends StatelessWidget {
-  const _ButtonHorizontalMode();
+class _Button extends StatelessWidget {
+  const _Button({
+    required this.isActive,
+    required this.imageAsset,
+    required this.onTap,
+  });
+
+  final bool isActive;
+  final String imageAsset;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Image.asset(
-        AppImages.horizontalMode,
-        color: AppColors.white.withOpacity(0.5),
-        colorBlendMode: BlendMode.modulate,
-      ),
-    );
-  }
-}
-
-class _ButtonVerticalMode extends StatelessWidget {
-  const _ButtonVerticalMode();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Image.asset(
-        AppImages.verticalMode,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.white : null,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Image.asset(
+          imageAsset,
+          color: !isActive ? AppColors.white.withOpacity(0.5) : null,
+          colorBlendMode: !isActive ? BlendMode.modulate : null,
+        ),
       ),
     );
   }

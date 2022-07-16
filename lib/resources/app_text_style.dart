@@ -30,12 +30,29 @@ abstract class AppTextStyle {
     letterSpacing: 12 * 0.03,
     color: AppColors.greySoft,
   );
-  static const wallpaperSpecificationInfo = TextStyle(
+  static const wallpaperSpecificationInfoGridView = TextStyle(
     fontFamily: AppFonts.montserrat,
     fontWeight: FontWeight.w700,
     fontStyle: FontStyle.normal,
     fontSize: 10,
     height: 12 / 10,
     color: AppColors.blueDark,
+  );
+  static const wallpaperSpecificationInfoListView = TextStyle(
+    fontFamily: AppFonts.montserrat,
+    fontWeight: FontWeight.w500,
+    fontStyle: FontStyle.normal,
+    fontSize: 14,
+    height: 17 / 14,
+    color: AppColors.blueDark,
+  );
+  static const buttonSetAsWallpaper = TextStyle(
+    fontFamily: AppFonts.lato,
+    fontWeight: FontWeight.w700,
+    fontStyle: FontStyle.normal,
+    fontSize: 14,
+    height: 17 / 14,
+    color: AppColors.white,
+    letterSpacing: 14 * 0.03,
   );
 }

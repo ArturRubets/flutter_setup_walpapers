@@ -46,6 +46,22 @@ class _WallpapersViewState extends State<WallpapersView> {
             const SizedBox(height: 18),
             BlocBuilder<WallpapersBloc, WallpapersState>(
               builder: (context, state) {
+                final isGridMode =
+                    state.displayMode == WallpaperDisplayMode.grid;
+                final gridDelegate = isGridMode
+                    ? const SliverGridDelegateWithMaxCrossAxisExtent(
+                        mainAxisExtent: 203,
+                        maxCrossAxisExtent: 164,
+                        mainAxisSpacing: 7,
+                        crossAxisSpacing: 7,
+                      )
+                    : const SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: 7,
+                        crossAxisSpacing: 7,
+                        crossAxisCount: 1,
+                        childAspectRatio: 327 / 130,
+                      );
+
                 switch (state.status) {
                   case WallpaperStatus.initial:
                     return const Loader();
@@ -59,13 +75,7 @@ class _WallpapersViewState extends State<WallpapersView> {
                         child: GridView.builder(
                           controller: _scrollController,
                           itemCount: state.wallpapers.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            mainAxisExtent: 203,
-                            maxCrossAxisExtent: 164,
-                            mainAxisSpacing: 7,
-                            crossAxisSpacing: 7,
-                          ),
+                          gridDelegate: gridDelegate,
                           itemBuilder: (context, index) {
                             if (index >= state.wallpapers.length) {
                               return const Loader();
@@ -73,7 +83,9 @@ class _WallpapersViewState extends State<WallpapersView> {
                             final wallpaper = state.wallpapers[index];
                             return Provider(
                               create: (context) => wallpaper,
-                              child: const WallpaperWidget(),
+                              child: isGridMode
+                                  ? const WallpaperGridMode()
+                                  : const WallpaperListMode(),
                             );
                           },
                         ),

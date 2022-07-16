@@ -5,8 +5,8 @@ import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_r
 import '../../../resources/resources.dart';
 import '../../../utils/convert_from_byte_to_mb.dart';
 
-class WallpaperWidget extends StatelessWidget {
-  const WallpaperWidget({super.key});
+class WallpaperGridMode extends StatelessWidget {
+  const WallpaperGridMode({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,16 +74,35 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          item(
-            Row(
-              children: [
-                Image.asset(AppImages.heart),
-                Text('$favorites'),
-              ],
+          Flexible(
+            flex: 2,
+            child: item(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(AppImages.heart),
+                  Flexible(
+                    child: Text(
+                      '$favorites',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 3),
-          item(Text(category)),
+          Flexible(
+            flex: 3,
+            child: item(
+              Text(
+                category,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -142,7 +161,7 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 description,
-                style: AppTextStyle.wallpaperSpecificationInfo,
+                style: AppTextStyle.wallpaperSpecificationInfoGridView,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),

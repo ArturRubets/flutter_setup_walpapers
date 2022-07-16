@@ -25,6 +25,14 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       _onFetched,
       transformer: _throttleDroppable(_throttleDuration),
     );
+    on<WallpaperGridModeSwitched>(
+      _onGridModeSwitched,
+      transformer: _throttleDroppable(_throttleDuration),
+    );
+    on<WallpaperListModeSwitched>(
+      _onListModeSwitched,
+      transformer: _throttleDroppable(_throttleDuration),
+    );
   }
 
   final _wallpaperRepository = WallpaperRepository();
@@ -61,11 +69,40 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
   }
 
+  FutureOr<void> _onGridModeSwitched(
+      WallpaperGridModeSwitched event, Emitter<WallpapersState> emit) {
+    if (state.displayMode == WallpaperDisplayMode.list) {
+      emit(state.copyWith(displayMode: WallpaperDisplayMode.grid));
+    }
+  }
+
+  FutureOr<void> _onListModeSwitched(
+      WallpaperListModeSwitched event, Emitter<WallpapersState> emit) {
+    if (state.displayMode == WallpaperDisplayMode.grid) {
+      emit(state.copyWith(displayMode: WallpaperDisplayMode.list));
+    }
+  }
+
   bool _hasReachedMax(WallpaperResponse wallpapers) {
     return wallpapers.meta.lastPage == wallpapers.meta.currentPage;
   }
 
   Future<WallpaperResponse> _fetchWallpapers(int page) async {
     return await _wallpaperRepository.getWallpaper(page);
+  }
+
+  String? convertDateTime(String date) {
+    try {
+      final dateTime = DateTime.parse(date);
+      final minute = '${dateTime.minute}'.padLeft(2, '0');
+      final hour = '${dateTime.hour}'.padLeft(2, '0');
+      final day = '${dateTime.day}'.padLeft(2, '0');
+      final month = '${dateTime.month}'.padLeft(2, '0');
+      final year = '${dateTime.year}'.padLeft(2, '0');
+
+      return '$hour:$minute ($year-$month-$day)';
+    } catch (e) {
+      return null;
+    }
   }
 }
