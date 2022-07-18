@@ -37,6 +37,10 @@ class _WallpapersViewState extends State<WallpapersView> {
 
   @override
   Widget build(BuildContext context) {
+    const wallpaperGridMode = WallpaperGridMode();
+
+    const wallpaperListMode = WallpaperListMode();
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -51,7 +55,7 @@ class _WallpapersViewState extends State<WallpapersView> {
                 final gridDelegate = isGridMode
                     ? const SliverGridDelegateWithMaxCrossAxisExtent(
                         mainAxisExtent: 203,
-                        maxCrossAxisExtent: 164,
+                        maxCrossAxisExtent: 170,
                         mainAxisSpacing: 7,
                         crossAxisSpacing: 7,
                       )
@@ -84,8 +88,8 @@ class _WallpapersViewState extends State<WallpapersView> {
                             return Provider(
                               create: (context) => wallpaper,
                               child: isGridMode
-                                  ? const WallpaperGridMode()
-                                  : const WallpaperListMode(),
+                                  ? wallpaperGridMode
+                                  : wallpaperListMode,
                             );
                           },
                         ),

@@ -12,11 +12,10 @@ class ButtonSetWallpaper extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       color: AppColors.green,
       child: InkWell(
-        splashColor: Colors.white10,
         onTap: () {},
         child: const Center(
           child: Text(
-            'Set as wallpaper',
+            'Download',
             style: AppTextStyle.buttonSetAsWallpaper,
           ),
         ),

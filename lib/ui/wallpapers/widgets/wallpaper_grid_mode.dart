@@ -4,30 +4,49 @@ import 'package:provider/provider.dart';
 import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 import '../../../resources/resources.dart';
 import '../../../utils/convert_from_byte_to_mb.dart';
+import '../../navigation/main_navigation.dart';
 
 class WallpaperGridMode extends StatelessWidget {
   const WallpaperGridMode({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 8,
-        top: 8,
-        right: 8,
-        bottom: 16,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.greySoft,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Column(
-        children: const [
-          Expanded(child: _WallpaperPhoto()),
-          SizedBox(height: 10),
-          _WallpaperSpecificationInfo()
-        ],
-      ),
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(
+            left: 8,
+            top: 8,
+            right: 8,
+            bottom: 16,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.greySoft,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Column(
+            children: const [
+              Expanded(child: _WallpaperPhoto()),
+              SizedBox(height: 10),
+              _WallpaperSpecificationInfo()
+            ],
+          ),
+        ),
+        Material(
+          borderRadius: BorderRadius.circular(25),
+          clipBehavior: Clip.hardEdge,
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              final wallpaper = context.read<Wallpaper>();
+              Navigator.of(context).pushNamed(
+                MainNavigationRouteNames.wallpaperScreenDetail,
+                arguments: wallpaper,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../wallpapers/wallpapers.dart';
+import '../../navigation/main_navigation.dart';
 
 class AppView extends StatelessWidget {
   const AppView({super.key});
@@ -8,7 +8,8 @@ class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: WallpapersPage(),
+      onGenerateRoute: MainNavigation.onGenerateRoute,
+      initialRoute: MainNavigationRouteNames.wallpapersScreen,
     );
   }
 }

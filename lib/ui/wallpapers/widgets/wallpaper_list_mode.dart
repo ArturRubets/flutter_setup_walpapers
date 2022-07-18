@@ -3,50 +3,47 @@ import 'package:provider/provider.dart';
 
 import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 import '../../../resources/resources.dart';
-import '../../../utils/convert_from_byte_to_mb.dart';
-import '../../common_widgets/button_set_wallpaper.dart';
-import '../bloc/wallpapers_bloc.dart';
+import '../../../utils/utils.dart';
+import '../../common_widgets/common_widgets.dart';
+import '../../navigation/main_navigation.dart';
 
 class WallpaperListMode extends StatelessWidget {
   const WallpaperListMode({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 130,
-      child: Container(
-        padding: const EdgeInsets.only(
-          left: 8,
-          top: 8,
-          right: 16,
-          bottom: 8,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.greySoft,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Row(
-          children: [
-            const Expanded(flex: 144, child: _WallpaperPhoto()),
-            const SizedBox(width: 10),
-            Expanded(
-              flex: 203,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: const [
-                  SizedBox(height: 9),
-                  _WallpaperSpecificationInfo(),
-                  Spacer(flex: 3),
-                  SizedBox(
-                    height: 42,
-                    child: ButtonSetWallpaper(),
-                  ),
-                  Spacer(flex: 1),
-                ],
-              ),
-            )
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.only(
+        left: 8,
+        top: 8,
+        right: 16,
+        bottom: 8,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.greySoft,
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: Row(
+        children: [
+          const Expanded(flex: 144, child: _WallpaperPhoto()),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 203,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: const [
+                SizedBox(height: 9),
+                _WallpaperSpecificationInfo(),
+                Spacer(flex: 3),
+                SizedBox(
+                  height: 42,
+                  child: ButtonSetWallpaper(),
+                ),
+                Spacer(flex: 1),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
@@ -73,6 +70,20 @@ class _WallpaperPhoto extends StatelessWidget {
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),
+        Material(
+          borderRadius: BorderRadius.circular(15),
+          clipBehavior: Clip.hardEdge,
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              final wallpaper = context.read<Wallpaper>();
+              Navigator.of(context).pushNamed(
+                MainNavigationRouteNames.wallpaperScreenDetail,
+                arguments: wallpaper,
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -156,11 +167,10 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
     final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
 
     final createdAt = context.select<Wallpaper, String>((w) => w.createdAt);
-    final createdAtFormat =
-        context.read<WallpapersBloc>().convertDateTime(createdAt);
+    final createdAtFormat = convertDateTime(createdAt);
 
     return Wrap(
-      runSpacing: 18,
+      runSpacing: 10,
       spacing: 10,
       children: [
         item(AppImages.expand, resolution),
