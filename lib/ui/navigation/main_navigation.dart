@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
+import '../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
+import '../wallpaper_detail/bloc/wallpaper_detail_bloc.dart';
 import '../wallpaper_detail/view/wallpaper_detail_page.dart';
+import '../wallpapers/models/wallpaper.dart';
 import '../wallpapers/wallpapers.dart';
 
 abstract class MainNavigationRouteNames {
@@ -19,10 +21,11 @@ abstract class MainNavigation {
         );
       case MainNavigationRouteNames.wallpaperScreenDetail:
         final arguments = settings.arguments;
-        final wallpaper = arguments is Wallpaper ? arguments : null;
+        final wallpaper = arguments is WallpaperModelBloc ? arguments : null;
         return MaterialPageRoute(
-          builder: (_) => Provider(
-            create: (context) => wallpaper,
+          builder: (_) => BlocProvider(
+            create: (context) => WallpaperDetailBloc(
+                context.read<WallpaperRepository>(), wallpaper!),
             child: const WallpaperDetailPage(),
           ),
         );

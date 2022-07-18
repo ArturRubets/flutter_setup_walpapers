@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 import '../../../resources/resources.dart';
 import '../../../utils/convert_from_byte_to_mb.dart';
 import '../../navigation/main_navigation.dart';
+import '../models/wallpaper.dart';
 
 class WallpaperGridMode extends StatelessWidget {
   const WallpaperGridMode({super.key});
@@ -38,7 +38,7 @@ class WallpaperGridMode extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              final wallpaper = context.read<Wallpaper>();
+              final wallpaper = context.read<WallpaperModelBloc>();
               Navigator.of(context).pushNamed(
                 MainNavigationRouteNames.wallpaperScreenDetail,
                 arguments: wallpaper,
@@ -56,8 +56,9 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final thumbOriginal =
-        context.select<Wallpaper, String>((w) => w.thumbs.original);
+    final imageWidget =
+        context.read<WallpaperModelBloc>().thumbs.getSmallImageWidget();
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -65,10 +66,7 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: Image.network(
-              thumbOriginal,
-              fit: BoxFit.cover,
-            ),
+            child: imageWidget,
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),
@@ -82,8 +80,10 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.select<Wallpaper, int>((w) => w.favorites);
-    final category = context.select<Wallpaper, String>((w) => w.category);
+    final favorites =
+        context.select<WallpaperModelBloc, int>((w) => w.favorites);
+    final category =
+        context.select<WallpaperModelBloc, String>((w) => w.category);
 
     return Positioned(
       left: 8,
@@ -150,9 +150,10 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolution = context.select<Wallpaper, String>((w) => w.resolution);
+    final resolution =
+        context.select<WallpaperModelBloc, String>((w) => w.resolution);
     final fileSizeBytes =
-        context.select<Wallpaper, int>((w) => w.fileSizeBytes);
+        context.select<WallpaperModelBloc, int>((w) => w.fileSizeBytes);
     final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
 
     return Row(

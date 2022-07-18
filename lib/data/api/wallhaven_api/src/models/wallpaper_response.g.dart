@@ -6,21 +6,23 @@ part of 'wallpaper_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-WallpaperResponse _$WallpaperResponseFromJson(Map<String, dynamic> json) =>
-    WallpaperResponse(
+WallpaperResponseApi _$WallpaperResponseApiFromJson(
+        Map<String, dynamic> json) =>
+    WallpaperResponseApi(
       data: (json['data'] as List<dynamic>)
-          .map((e) => Wallpaper.fromJson(e as Map<String, dynamic>))
+          .map((e) => WallpaperApi.fromJson(e as Map<String, dynamic>))
           .toList(),
-      meta: Meta.fromJson(json['meta'] as Map<String, dynamic>),
+      meta: MetaApi.fromJson(json['meta'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$WallpaperResponseToJson(WallpaperResponse instance) =>
+Map<String, dynamic> _$WallpaperResponseApiToJson(
+        WallpaperResponseApi instance) =>
     <String, dynamic>{
       'data': instance.data,
       'meta': instance.meta,
     };
 
-Wallpaper _$WallpaperFromJson(Map<String, dynamic> json) => Wallpaper(
+WallpaperApi _$WallpaperApiFromJson(Map<String, dynamic> json) => WallpaperApi(
       id: json['id'] as String,
       url: json['url'] as String,
       shortUrl: json['short_url'] as String,
@@ -39,10 +41,11 @@ Wallpaper _$WallpaperFromJson(Map<String, dynamic> json) => Wallpaper(
       colors:
           (json['colors'] as List<dynamic>).map((e) => e as String).toList(),
       path: json['path'] as String,
-      thumbs: Thumbs.fromJson(json['thumbs'] as Map<String, dynamic>),
+      thumbs: ThumbsApi.fromJson(json['thumbs'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$WallpaperToJson(Wallpaper instance) => <String, dynamic>{
+Map<String, dynamic> _$WallpaperApiToJson(WallpaperApi instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'url': instance.url,
       'short_url': instance.shortUrl,
@@ -63,32 +66,32 @@ Map<String, dynamic> _$WallpaperToJson(Wallpaper instance) => <String, dynamic>{
       'thumbs': instance.thumbs,
     };
 
-Thumbs _$ThumbsFromJson(Map<String, dynamic> json) => Thumbs(
+ThumbsApi _$ThumbsApiFromJson(Map<String, dynamic> json) => ThumbsApi(
       large: json['large'] as String,
       original: json['original'] as String,
       small: json['small'] as String,
     );
 
-Map<String, dynamic> _$ThumbsToJson(Thumbs instance) => <String, dynamic>{
+Map<String, dynamic> _$ThumbsApiToJson(ThumbsApi instance) => <String, dynamic>{
       'large': instance.large,
       'original': instance.original,
       'small': instance.small,
     };
 
-Meta _$MetaFromJson(Map<String, dynamic> json) => Meta(
+MetaApi _$MetaApiFromJson(Map<String, dynamic> json) => MetaApi(
       currentPage: json['current_page'] as int,
       lastPage: json['last_page'] as int,
       perPage: json['per_page'] as String,
       total: json['total'] as int,
       query: json['query'] == null
           ? null
-          : Query.fromJson(json['query'] as Map<String, dynamic>),
+          : QueryApi.fromJson(json['query'] as Map<String, dynamic>),
       seed: json['seed'] == null
           ? null
-          : Seed.fromJson(json['seed'] as Map<String, dynamic>),
+          : SeedApi.fromJson(json['seed'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$MetaToJson(Meta instance) => <String, dynamic>{
+Map<String, dynamic> _$MetaApiToJson(MetaApi instance) => <String, dynamic>{
       'current_page': instance.currentPage,
       'last_page': instance.lastPage,
       'per_page': instance.perPage,
@@ -97,10 +100,10 @@ Map<String, dynamic> _$MetaToJson(Meta instance) => <String, dynamic>{
       'seed': instance.seed,
     };
 
-Query _$QueryFromJson(Map<String, dynamic> json) => Query();
+QueryApi _$QueryApiFromJson(Map<String, dynamic> json) => QueryApi();
 
-Map<String, dynamic> _$QueryToJson(Query instance) => <String, dynamic>{};
+Map<String, dynamic> _$QueryApiToJson(QueryApi instance) => <String, dynamic>{};
 
-Seed _$SeedFromJson(Map<String, dynamic> json) => Seed();
+SeedApi _$SeedApiFromJson(Map<String, dynamic> json) => SeedApi();
 
-Map<String, dynamic> _$SeedToJson(Seed instance) => <String, dynamic>{};
+Map<String, dynamic> _$SeedApiToJson(SeedApi instance) => <String, dynamic>{};

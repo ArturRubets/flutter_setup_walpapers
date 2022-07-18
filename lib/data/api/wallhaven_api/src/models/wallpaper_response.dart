@@ -3,22 +3,22 @@ import 'package:json_annotation/json_annotation.dart';
 part 'wallpaper_response.g.dart';
 
 @JsonSerializable()
-class WallpaperResponse {
-  factory WallpaperResponse.fromJson(Map<String, dynamic> json) =>
-      _$WallpaperResponseFromJson(json);
+class WallpaperResponseApi {
+  factory WallpaperResponseApi.fromJson(Map<String, dynamic> json) =>
+      _$WallpaperResponseApiFromJson(json);
 
-  const WallpaperResponse({
+  const WallpaperResponseApi({
     required this.data,
     required this.meta,
   });
-  final List<Wallpaper> data;
-  final Meta meta;
-  Map<String, dynamic> toJson() => _$WallpaperResponseToJson(this);
+  final List<WallpaperApi> data;
+  final MetaApi meta;
+  Map<String, dynamic> toJson() => _$WallpaperResponseApiToJson(this);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class Wallpaper {
-  const Wallpaper({
+class WallpaperApi {
+  const WallpaperApi({
     required this.id,
     required this.url,
     required this.shortUrl,
@@ -39,8 +39,8 @@ class Wallpaper {
     required this.thumbs,
   });
 
-  factory Wallpaper.fromJson(Map<String, dynamic> json) =>
-      _$WallpaperFromJson(json);
+  factory WallpaperApi.fromJson(Map<String, dynamic> json) =>
+      _$WallpaperApiFromJson(json);
 
   final String id;
   final String url;
@@ -59,31 +59,32 @@ class Wallpaper {
   final String createdAt;
   final List<String> colors;
   final String path;
-  final Thumbs thumbs;
+  final ThumbsApi thumbs;
 
-  Map<String, dynamic> toJson() => _$WallpaperToJson(this);
+  Map<String, dynamic> toJson() => _$WallpaperApiToJson(this);
 }
 
 @JsonSerializable()
-class Thumbs {
-  const Thumbs({
+class ThumbsApi {
+  const ThumbsApi({
     required this.large,
     required this.original,
     required this.small,
   });
 
-  factory Thumbs.fromJson(Map<String, dynamic> json) => _$ThumbsFromJson(json);
+  factory ThumbsApi.fromJson(Map<String, dynamic> json) =>
+      _$ThumbsApiFromJson(json);
 
   final String large;
   final String original;
   final String small;
 
-  Map<String, dynamic> toJson() => _$ThumbsToJson(this);
+  Map<String, dynamic> toJson() => _$ThumbsApiToJson(this);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class Meta {
-  const Meta({
+class MetaApi {
+  const MetaApi({
     required this.currentPage,
     required this.lastPage,
     required this.perPage,
@@ -92,32 +93,35 @@ class Meta {
     required this.seed,
   });
 
-  factory Meta.fromJson(Map<String, dynamic> json) => _$MetaFromJson(json);
+  factory MetaApi.fromJson(Map<String, dynamic> json) =>
+      _$MetaApiFromJson(json);
 
   final int currentPage;
   final int lastPage;
   final String perPage;
   final int total;
-  final Query? query;
-  final Seed? seed;
+  final QueryApi? query;
+  final SeedApi? seed;
 
-  Map<String, dynamic> toJson() => _$MetaToJson(this);
+  Map<String, dynamic> toJson() => _$MetaApiToJson(this);
 }
 
 @JsonSerializable()
-class Query {
-  const Query();
+class QueryApi {
+  const QueryApi();
 
-  factory Query.fromJson(Map<String, dynamic> json) => _$QueryFromJson(json);
+  factory QueryApi.fromJson(Map<String, dynamic> json) =>
+      _$QueryApiFromJson(json);
 
-  Map<String, dynamic> toJson() => _$QueryToJson(this);
+  Map<String, dynamic> toJson() => _$QueryApiToJson(this);
 }
 
 @JsonSerializable()
-class Seed {
-  const Seed();
+class SeedApi {
+  const SeedApi();
 
-  factory Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
+  factory SeedApi.fromJson(Map<String, dynamic> json) =>
+      _$SeedApiFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SeedToJson(this);
+  Map<String, dynamic> toJson() => _$SeedApiToJson(this);
 }

@@ -6,14 +6,14 @@ enum WallpaperDisplayMode { grid, list }
 
 class WallpapersState extends Equatable {
   const WallpapersState({
-    this.wallpapers = const <Wallpaper>[],
+    this.wallpapers = const <WallpaperModelBloc>[],
     this.hasReachedMax = false,
     this.currentPage = 1,
     this.status = WallpaperStatus.initial,
     this.displayMode = WallpaperDisplayMode.grid,
   });
 
-  final List<Wallpaper> wallpapers;
+  final List<WallpaperModelBloc> wallpapers;
   final bool hasReachedMax;
   final int currentPage;
   final WallpaperStatus status;
@@ -21,11 +21,17 @@ class WallpapersState extends Equatable {
 
   @override
   List<Object?> get props {
-    return [wallpapers, hasReachedMax, currentPage, status, displayMode];
+    return [
+      wallpapers,
+      hasReachedMax,
+      currentPage,
+      status,
+      displayMode,
+    ];
   }
 
   WallpapersState copyWith({
-    List<Wallpaper>? wallpapers,
+    List<WallpaperModelBloc>? wallpapers,
     bool? hasReachedMax,
     int? currentPage,
     WallpaperStatus? status,

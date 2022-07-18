@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -15,7 +16,7 @@ class WallhavenApiClient {
 
   final http.Client _httpClient;
 
-  Future<WallpaperResponse> wallpaper(int page, String apiKey) async {
+  Future<WallpaperResponseApi> wallpaper(int page, String apiKey) async {
     final request = Uri.https(
       Configuration.baseUrl,
       'api/v1/search',
@@ -38,6 +39,14 @@ class WallhavenApiClient {
       throw WallpaperNotFoundFailure();
     }
 
-    return WallpaperResponse.fromJson(json);
+    return WallpaperResponseApi.fromJson(json);
+  }
+
+  Future<Uint8List?> imageFromNetworkToBytes(String path) async {
+    try {
+      final response = await http.get(Uri.parse(path));
+      return response.bodyBytes;
+    } catch (_) {}
+    return null;
   }
 }

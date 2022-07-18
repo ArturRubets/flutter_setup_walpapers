@@ -1,37 +1,37 @@
-class WallpaperResponse {
-  const WallpaperResponse({
+class WallpaperResponseDomain {
+  const WallpaperResponseDomain({
     required this.data,
     required this.meta,
   });
 
-  final List<Wallpaper> data;
-  final Meta meta;
+  final List<WallpaperDomain> data;
+  final MetaDomain meta;
 }
 
-class Wallpaper {
-  const Wallpaper({
+class WallpaperDomain {
+  const WallpaperDomain({
     required this.favorites,
     required this.category,
     required this.resolution,
     required this.fileSizeBytes,
-    required this.fileType,
     required this.createdAt,
     required this.path,
     required this.thumbs,
+    required this.id,
   });
 
   final int favorites;
   final String category;
   final String resolution;
   final int fileSizeBytes;
-  final String fileType;
   final String createdAt;
   final String path;
-  final Thumbs thumbs;
+  final ThumbsDomain thumbs;
+  final String id;
 }
 
-class Thumbs {
-  const Thumbs({
+class ThumbsDomain {
+  const ThumbsDomain({
     required this.large,
     required this.original,
     required this.small,
@@ -42,8 +42,8 @@ class Thumbs {
   final String small;
 }
 
-class Meta {
-  const Meta({
+class MetaDomain {
+  const MetaDomain({
     required this.currentPage,
     required this.lastPage,
   });

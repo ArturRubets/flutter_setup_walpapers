@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
 import '../../../resources/resources.dart';
 import '../../common_widgets/loader.dart';
 import '../bloc/wallpapers_bloc.dart';
@@ -13,7 +14,8 @@ class WallpapersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => WallpapersBloc()..add(WallpapersFetched()),
+      create: (_) => WallpapersBloc(context.read<WallpaperRepository>())
+        ..add(WallpapersFetched()),
       child: const WallpapersView(),
     );
   }
@@ -49,7 +51,8 @@ class _WallpapersViewState extends State<WallpapersView> {
             const AppBarWidget(),
             const SizedBox(height: 18),
             BlocBuilder<WallpapersBloc, WallpapersState>(
-              builder: (context, state) {
+              builder: (context, 
+              state) {
                 final isGridMode =
                     state.displayMode == WallpaperDisplayMode.grid;
                 final gridDelegate = isGridMode
@@ -85,8 +88,11 @@ class _WallpapersViewState extends State<WallpapersView> {
                               return const Loader();
                             }
                             final wallpaper = state.wallpapers[index];
-                            return Provider(
-                              create: (context) => wallpaper,
+                            return MultiProvider(
+                              providers: [
+                                Provider(create: (_) => wallpaper),
+                                Provider(create: (_) => index),
+                              ],
                               child: isGridMode
                                   ? wallpaperGridMode
                                   : wallpaperListMode,

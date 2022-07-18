@@ -46,7 +46,7 @@ abstract class AppTextStyle {
     height: 17 / 14,
     color: AppColors.blueDark,
   );
-  static const buttonSetAsWallpaper = TextStyle(
+  static const buttonSetAsWallpaperAndDownload = TextStyle(
     fontFamily: AppFonts.lato,
     fontWeight: FontWeight.w700,
     fontStyle: FontStyle.normal,

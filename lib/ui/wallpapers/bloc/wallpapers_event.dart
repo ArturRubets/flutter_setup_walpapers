@@ -12,3 +12,13 @@ class WallpapersFetched extends WallpapersEvent {}
 class WallpaperGridModeSwitched extends WallpapersEvent {}
 
 class WallpaperListModeSwitched extends WallpapersEvent {}
+
+class WallpaperDownloaded extends WallpapersEvent {
+  const WallpaperDownloaded(
+    this.wallpaperBloc,
+    this.indexWallpaperInList,
+  );
+
+  final WallpaperModelBloc wallpaperBloc;
+  final int indexWallpaperInList;
+}
