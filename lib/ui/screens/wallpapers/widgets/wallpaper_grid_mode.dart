@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../resources/resources.dart';
-import '../../../utils/convert_from_byte_to_mb.dart';
-import '../../navigation/main_navigation.dart';
+import '../../../../resources/resources.dart';
+import '../../../../utils/utils.dart';
+import '../../../navigation/main_navigation.dart';
 import '../models/wallpaper.dart';
 
 class WallpaperGridMode extends StatelessWidget {

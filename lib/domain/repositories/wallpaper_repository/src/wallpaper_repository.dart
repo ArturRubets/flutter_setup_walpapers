@@ -2,7 +2,7 @@ import '../../../../data/api/wallhaven_api/configuration.dart';
 import '../../../../data/api/wallhaven_api/wallhaven_api_client.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/local_storage_wallpapers.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/models/wallpaper.dart';
-import '../../../../ui/wallpapers/models/wallpaper.dart';
+import '../../../../ui/screens/wallpapers/models/wallpaper.dart';
 import 'models/wallpaper_response.dart';
 
 class WallpaperNotFoundFailure implements Exception {}

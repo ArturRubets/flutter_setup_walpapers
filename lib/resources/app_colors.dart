@@ -10,4 +10,6 @@ abstract class AppColors {
   static const blueDark = Color(0xFF53587A);
   static const grey = Color(0xFFD9D9D9);
   static const green = Color(0xFF8BC83F);
+  static const loaderWhite = Colors.white;
+  static const loaderBlue = Colors.blue;
 }

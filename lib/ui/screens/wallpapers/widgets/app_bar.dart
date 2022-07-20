@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../resources/resources.dart';
+import '../../../../resources/resources.dart';
 import '../bloc/wallpapers_bloc.dart';
 
 class AppBarWidget extends StatelessWidget {

@@ -9,6 +9,8 @@ abstract class WallpapersEvent extends Equatable {
 
 class WallpapersFetched extends WallpapersEvent {}
 
+class WallpapersFetchedUpdate extends WallpapersEvent {}
+
 class WallpaperGridModeSwitched extends WallpapersEvent {}
 
 class WallpaperListModeSwitched extends WallpapersEvent {}

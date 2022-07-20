@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
+import '../../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
 import '../../wallpapers/models/wallpaper.dart';
 
 part 'wallpaper_detail_event.dart';

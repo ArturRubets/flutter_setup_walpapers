@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../resources/resources.dart';
-import '../../../utils/utils.dart';
-import '../../common_widgets/common_widgets.dart';
+import '../../../../resources/resources.dart';
+import '../../../../utils/utils.dart';
+import '../../../common_widgets/common_widgets.dart';
 import '../../wallpapers/models/wallpaper.dart';
 import '../bloc/wallpaper_detail_bloc.dart';
 
@@ -63,7 +63,7 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
               case WallpaperDownload.loading:
                 return ButtonSetWallpaper(
                   content: const Center(
-                    child: Loader(),
+                    child: Loader(color: AppColors.white),
                   ),
                   onTap: () async {},
                 );

@@ -1,6 +1,6 @@
 part of 'wallpapers_bloc.dart';
 
-enum WallpaperStatus { initial, success, failure }
+enum WallpaperStatus { initial, loading, success, failure }
 
 enum WallpaperDisplayMode { grid, list }
 

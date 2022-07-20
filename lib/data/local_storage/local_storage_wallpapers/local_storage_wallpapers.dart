@@ -39,12 +39,13 @@ class LocalStorageWallpapers {
   }
 
   Future<List<WallpaperLocalStorage>> getWallpapers() async {
+    print(1);
     final db = await database;
 
     final listWallpapersJson = await db.query(sqlTableWallpapers);
-
+print(2);
     final wallpapersList = await compute(decodeWallpapers, listWallpapersJson);
-
+print(3);
     return wallpapersList;
   }
 

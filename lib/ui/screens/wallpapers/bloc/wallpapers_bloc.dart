@@ -6,9 +6,9 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../data/local_storage/local_storage_wallpapers/models/wallpaper.dart';
-import '../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
-import '../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
+import '../../../../data/local_storage/local_storage_wallpapers/models/wallpaper.dart';
+import '../../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
+import '../../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
 import '../models/wallpaper.dart';
 
 part 'wallpapers_event.dart';
@@ -26,6 +26,10 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
   WallpapersBloc(this._wallpaperRepository) : super(const WallpapersState()) {
     on<WallpapersFetched>(
       _onFetched,
+      transformer: _throttleDroppable(_throttleDuration),
+    );
+    on<WallpapersFetchedUpdate>(
+      _onFetchedUpdate,
       transformer: _throttleDroppable(_throttleDuration),
     );
     on<WallpaperGridModeSwitched>(
@@ -47,7 +51,8 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
   ) async {
     if (state.hasReachedMax) return;
     try {
-      if (state.status == WallpaperStatus.initial) {
+      if (state.status == WallpaperStatus.initial ||
+          state.status == WallpaperStatus.loading) {
         final wallpapers = await _fetchWallpapersFromApi(state.currentPage);
         final hasReachedMax = _hasReachedMax(wallpapers);
 
@@ -83,6 +88,18 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     } catch (_) {
       emit(state.copyWith(status: WallpaperStatus.failure));
     }
+  }
+
+  FutureOr<void> _onFetchedUpdate(
+    WallpapersFetchedUpdate event,
+    Emitter<WallpapersState> emit,
+  ) async {
+    emit(state.copyWith(
+      currentPage: 1,
+      status: WallpaperStatus.loading,
+    ));
+
+    add(WallpapersFetched());
   }
 
   FutureOr<void> _onGridModeSwitched(
