@@ -36,10 +36,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       _onListModeSwitched,
       transformer: _throttleDroppable(_throttleDuration),
     );
-    on<WallpaperDownloaded>(
-      _onWallpaperDownloaded,
-      transformer: _throttleDroppable(_throttleDuration),
-    );
+    on<WallpaperDownloaded>(_onWallpaperDownloaded);
   }
 
   final WallpaperRepository _wallpaperRepository;
@@ -51,8 +48,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     if (state.hasReachedMax) return;
     try {
       if (state.status == WallpaperStatus.initial) {
-        final wallpapers =
-            await _fetchWallpapersFromApiAndCache(state.currentPage);
+        final wallpapers = await _fetchWallpapersFromApi(state.currentPage);
         final hasReachedMax = _hasReachedMax(wallpapers);
 
         return emit(
@@ -64,24 +60,24 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
           ),
         );
       }
-      final wallpapers =
-          await _fetchWallpapersFromApiAndCache(state.currentPage + 1);
+
+      final wallpapers = await _fetchWallpapersFromApi(state.currentPage + 1);
       final hasReachedMax = _hasReachedMax(wallpapers);
       emit(
         state.copyWith(
           wallpapers: List.of(state.wallpapers)..addAll(wallpapers.data),
           hasReachedMax: hasReachedMax,
-          currentPage: wallpapers.meta.currentPage,
           status: WallpaperStatus.success,
+          currentPage: wallpapers.meta.currentPage,
         ),
       );
     } on SocketException {
-      final wallpapers = _createAllWallpapersBlocFromCache().data;
+      final wallpapers = (await _createAllWallpapersBlocFromCache()).data;
       emit(
         state.copyWith(
-          hasReachedMax: true,
-          status: WallpaperStatus.success,
           wallpapers: wallpapers,
+          status: WallpaperStatus.success,
+          hasReachedMax: true,
         ),
       );
     } catch (_) {
@@ -109,26 +105,12 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     return lastPage == currentPage;
   }
 
-  Future<WallpaperResponseBloc> _fetchWallpapersFromApiAndCache(
-      int page) async {
+  Future<WallpaperResponseBloc> _fetchWallpapersFromApi(
+    int page,
+  ) async {
     final wallpapersApi = await _wallpaperRepository.getWallpaper(page);
-    final wallpapersStorage = _wallpaperRepository.getWallpaperFromStorage();
-
-    final wallpapersBloc = <WallpaperModelBloc>[];
-
-    for (var i = 0; i < wallpapersApi.data.length; i++) {
-      if (_findWallpaperInCacheById(
-        wallpapersStorage,
-        wallpapersApi.data[i].id,
-      )) {
-        final wallpaper = _createWallpaperBlocFromCache(wallpapersStorage
-            .firstWhere((element) => element.id == wallpapersApi.data[i].id));
-        wallpapersBloc.add(wallpaper);
-      } else {
-        final wallpaper = _createWallpaperBlocFromApi(wallpapersApi.data[i]);
-        wallpapersBloc.add(wallpaper);
-      }
-    }
+    final wallpapersBloc =
+        wallpapersApi.data.map(_createWallpaperBlocFromApi).toList();
 
     return WallpaperResponseBloc(
       data: wallpapersBloc,
@@ -139,15 +121,9 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     );
   }
 
-  bool _findWallpaperInCacheById(
-    List<WallpaperLocalStorage> wallpaperRepository,
-    String id,
-  ) {
-    return wallpaperRepository.map((e) => e.id).contains(id);
-  }
-
-  WallpaperResponseBloc _createAllWallpapersBlocFromCache() {
-    final wallpaperStorage = _wallpaperRepository.getWallpaperFromStorage();
+  Future<WallpaperResponseBloc> _createAllWallpapersBlocFromCache() async {
+    final wallpaperStorage =
+        await _wallpaperRepository.getWallpaperFromStorage();
     final wallpapers = wallpaperStorage
         .map<WallpaperModelBloc>(_createWallpaperBlocFromCache)
         .toList();
@@ -217,9 +193,11 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
         ),
       ),
     );
+
     if (!event.wallpaperBloc.isFromCache) {
       await _wallpaperRepository.saveWallpaperInStorage(eventWallpaper);
     }
+
     emit(
       state.copyWith(
         wallpapers: _updateWallpaperDownloadList(
@@ -231,7 +209,9 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
   }
 
   List<WallpaperModelBloc> _updateWallpaperDownloadList(
-      int eventIndex, WallpaperDownload status) {
+    int eventIndex,
+    WallpaperDownload status,
+  ) {
     var wallpaperUpdate = List<WallpaperModelBloc>.from(state.wallpapers);
 
     wallpaperUpdate[eventIndex] =

@@ -1,5 +1,5 @@
-import '../../../../data/api/wallhaven_api/src/configuration.dart';
-import '../../../../data/api/wallhaven_api/src/wallhaven_api_client.dart';
+import '../../../../data/api/wallhaven_api/configuration.dart';
+import '../../../../data/api/wallhaven_api/wallhaven_api_client.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/local_storage_wallpapers.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/models/wallpaper.dart';
 import '../../../../ui/wallpapers/models/wallpaper.dart';
@@ -50,8 +50,8 @@ class WallpaperRepository {
     return WallpaperResponseDomain(data: data, meta: meta);
   }
 
-  List<WallpaperLocalStorage> getWallpaperFromStorage() {
-    return _localStorageWallpapers.getWallpapers();
+  Future<List<WallpaperLocalStorage>> getWallpaperFromStorage() async {
+    return await _localStorageWallpapers.getWallpapers();
   }
 
   Future<void> saveWallpaperInStorage(WallpaperModelBloc wallpaperBloc) async {
@@ -72,7 +72,7 @@ class WallpaperRepository {
 
       final thumbOriginalImageBytes =
           await _wallhavenApiClient.imageFromNetworkToBytes(pathThumbOrigin);
-
+          
       await _localStorageWallpapers.saveWallpaper(
         WallpaperLocalStorage(
           favorites: wallpaperBloc.favorites,

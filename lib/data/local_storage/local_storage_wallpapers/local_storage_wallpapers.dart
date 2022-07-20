@@ -1,54 +1,61 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
 
+import 'configuration.dart';
 import 'models/wallpaper.dart';
 
 class LocalStorageWallpapers {
-  LocalStorageWallpapers({required SharedPreferences plugin})
-      : _plugin = plugin {
-    _init();
+  LocalStorageWallpapers(this.database);
+
+  Future<Database> database;
+
+  Future<void> saveWallpaper(
+    WallpaperLocalStorage wallpaperLocalStorage,
+  ) async {
+    final json = await compute(encodeWallpapers, wallpaperLocalStorage);
+
+    final valuesToSave = {
+      'id': int.tryParse(wallpaperLocalStorage.id),
+      'json': json,
+    };
+
+    final db = await database;
+
+    await db.insert(
+      sqlTableWallpapers,
+      valuesToSave,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
   }
 
-  final SharedPreferences _plugin;
-
-  final _wallpapers = <WallpaperLocalStorage>[];
-
-  static const kWallpapersCollectionKey = '__wallpapers_collection_key__';
-
-  void _init() {
-    final jsonWallpapers = _getValue(kWallpapersCollectionKey);
-    if (jsonWallpapers != null) {
-      final wallpapersJson =
-          List<Map<String, dynamic>>.from(json.decode(jsonWallpapers) as List);
-
-      final wallpapers =
-          wallpapersJson.map(WallpaperLocalStorage.fromJson).toList();
-      _wallpapers.addAll(wallpapers);
-    }
+  Future<String> encodeWallpapers(
+    WallpaperLocalStorage wallpaper,
+  ) async {
+    return json.encode(wallpaper);
   }
 
-  String? _getValue(String key) => _plugin.getString(key);
+  Future<List<WallpaperLocalStorage>> getWallpapers() async {
+    final db = await database;
 
-  Future<void> _setValue(String key, String value) =>
-      _plugin.setString(key, value);
+    final listWallpapersJson = await db.query(sqlTableWallpapers);
 
-  List<WallpaperLocalStorage> getWallpapers() => _wallpapers;
+    final wallpapersList = await compute(decodeWallpapers, listWallpapersJson);
 
-  Future<void> saveWallpaper(WallpaperLocalStorage wallpaper) async {
-    final wallpapers = [..._wallpapers];
-    final todoIndex = wallpapers.indexWhere((w) => w.id == wallpaper.id);
-    if (todoIndex >= 0) {
-      wallpapers[todoIndex] = wallpaper;
-    } else {
-      wallpapers.add(wallpaper);
-    }
+    return wallpapersList;
+  }
 
-    _wallpapers
-      ..clear()
-      ..addAll(wallpapers);
+  Future<List<WallpaperLocalStorage>> decodeWallpapers(
+    List<Map<String, dynamic>> listWallpapersJson,
+  ) async {
+    return List.generate(listWallpapersJson.length, (i) {
+      final rawJson = listWallpapersJson[i]['json'] as String;
+      final map = json.decode(rawJson) as Map<String, dynamic>;
 
-    await _setValue(kWallpapersCollectionKey, json.encode(wallpapers));
+      return WallpaperLocalStorage.fromJson(map);
+    });
   }
 }
