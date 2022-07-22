@@ -17,13 +17,33 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // String path2 = join(await getDatabasesPath(), 'demo.db');
+
+  // await deleteDatabase(path2);
+
+  final pathToDatabase = join(await getDatabasesPath(), nameDatabaseFile);
+
+  // await deleteDatabase(pathToDatabase);
+
+  // final table = sqlTableWallpapers;
+
   final database = openDatabase(
-    join(await getDatabasesPath(), nameDatabaseFile),
-    onCreate: (db, version) {
-      return db.execute(sqlQueryCreateTable);
-    },
+    pathToDatabase,
     version: 1,
+    onCreate: (db, version) async {
+      await db.execute(sqlQueryCreateTable);
+    },
   );
+
+  // await database.transaction((txn) async {
+  //   final id1 =
+  //       await txn.rawInsert('INSERT INTO $table(json) VALUES("some name")');
+  //   print('inserted1: $id1');
+  // });
+
+  // List<Map> list =
+  //     await (await database).rawQuery('SELECT * FROM $sqlTableWallpapers');
+  // print(list);
 
   final wallhavenApiClient = WallhavenApiClient();
   final wallpapersLocalStorage = LocalStorageWallpapers(database);
@@ -31,10 +51,4 @@ void main() async {
       WallpaperRepository(wallhavenApiClient, wallpapersLocalStorage);
 
   runApp(App(wallpaperRepository: wallpaperRepository));
-}
-
-class A {
-  A(this.a);
-
-  final int a;
 }

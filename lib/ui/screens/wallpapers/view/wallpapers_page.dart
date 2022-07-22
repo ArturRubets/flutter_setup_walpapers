@@ -15,7 +15,7 @@ class WallpapersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => WallpapersBloc(context.read<WallpaperRepository>())
-        ..add(WallpapersFetched()),
+        ..add(const WallpapersFetchedFromApi()),
       child: const WallpapersView(),
     );
   }
@@ -77,55 +77,65 @@ class _WallpapersViewState extends State<WallpapersView> {
                         crossAxisCount: 1,
                         childAspectRatio: 327 / 130,
                       );
+
+                var itemCount = state.wallpapers.length;
+                if (!state.hasReachedMax) {
+                  itemCount += isGridMode ? 2 : 1;
+                }
+                final listWallpapers = Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: itemCount,
+                      gridDelegate: gridDelegate,
+                      itemBuilder: (context, index) {
+                        if (index >= state.wallpapers.length) {
+                          return const Loader();
+                        }
+                        final wallpaper = state.wallpapers[index];
+
+                        return MultiProvider(
+                          providers: [
+                            Provider(create: (_) => wallpaper),
+                            Provider(create: (_) => index),
+                          ],
+                          child: isGridMode
+                              ? wallpaperGridMode
+                              : wallpaperListMode,
+                        );
+                      },
+                    ),
+                  ),
+                );
                 switch (state.status) {
-                  case WallpaperStatus.initial:
+                  case WallpapersScreenStatus.initial:
                     return const Expanded(
                       child: Loader(
                         height: 60,
                         width: 60,
                       ),
                     );
-                  case WallpaperStatus.failure:
-                    return const Expanded(
-                      child: Text('failed to fetch wallpapers'),
-                    );
-                  case WallpaperStatus.loading:
-                  case WallpaperStatus.success:
-                    final listWallpapers = Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: GridView.builder(
-                          controller: _scrollController,
-                          itemCount: state.wallpapers.length,
-                          gridDelegate: gridDelegate,
-                          itemBuilder: (context, index) {
-                            if (index >= state.wallpapers.length - 1) {
-                              return const Loader();
-                            }
-                            final wallpaper = state.wallpapers[index];
-                            return MultiProvider(
-                              providers: [
-                                Provider(create: (_) => wallpaper),
-                                Provider(create: (_) => index),
-                              ],
-                              child: isGridMode
-                                  ? wallpaperGridMode
-                                  : wallpaperListMode,
-                            );
-                          },
-                        ),
-                      ),
-                    );
+
+                  case WallpapersScreenStatus.failure:
                     return Expanded(
-                      child: Column(
+                      child: Stack(
                         children: [
-                          if (state.status == WallpaperStatus.loading)
-                            const Loader(),
-                          const SizedBox(height: 10),
-                          listWallpapers,
+                          const Align(
+                            alignment: Alignment.topCenter,
+                            child: Text('failed to fetch wallpapers'),
+                          ),
+                          ListView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                          ),
                         ],
                       ),
                     );
+
+                  case WallpapersScreenStatus.success:
+                    return listWallpapers;
                 }
               },
             ),
@@ -147,11 +157,11 @@ class _WallpapersViewState extends State<WallpapersView> {
     final wallpapersBloc = context.read<WallpapersBloc>();
 
     if (isTop) {
-      wallpapersBloc.add(WallpapersFetchedUpdate());
+      wallpapersBloc.add(const WallpapersFetchedRestart());
     }
 
     if (isBottom) {
-      wallpapersBloc.add(WallpapersFetched());
+      wallpapersBloc.add(const WallpapersFetched());
     }
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../resources/resources.dart';
 import '../../../../utils/utils.dart';
 import '../../../common_widgets/common_widgets.dart';
-import '../../wallpapers/models/wallpaper.dart';
+import '../../wallpapers/models/wallpaper_response.dart';
 import '../bloc/wallpaper_detail_bloc.dart';
 
 class WallpaperDetailPage extends StatelessWidget {
@@ -14,8 +14,20 @@ class WallpaperDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final paddingFromSystemBar = MediaQuery.of(context).padding.top;
     final wallpaper = context.read<WallpaperDetailBloc>().state.wallpaper;
-
-    final imageWidget = wallpaper.getMainImageWidget();
+    final bytes = wallpaper.mainImage?.bytes;
+    final path = wallpaper.mainImage?.path;
+    Image? image;
+    if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    } else if (path != null) {
+      image = Image.network(
+        path,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Scaffold(
       body: Stack(
@@ -23,7 +35,7 @@ class WallpaperDetailPage extends StatelessWidget {
         children: [
           Container(
             color: AppColors.grey,
-            child: imageWidget,
+            child: image,
           ),
           const _WallpaperSpecificationInfo(),
           const _ButtonDownloadAndSetWallpaper(),
@@ -47,9 +59,9 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
         height: 63,
         child: BlocBuilder<WallpaperDetailBloc, WallpaperDetailState>(
           builder: (context, state) {
-            switch (state.wallpaper.wallpaperDownload) {
-              case WallpaperDownload.failure:
-              case WallpaperDownload.initial:
+            final status = state.wallpaper.wallpaperStatus;
+            switch (status) {
+              case WallpaperStatus.initial:
                 return ButtonSetWallpaper(
                   content: const Center(
                     child: Text('Download'),
@@ -60,14 +72,14 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                         .add(const WallpaperDetailDownloaded());
                   },
                 );
-              case WallpaperDownload.loading:
+              case WallpaperStatus.loading:
                 return ButtonSetWallpaper(
                   content: const Center(
                     child: Loader(color: AppColors.white),
                   ),
                   onTap: () async {},
                 );
-              case WallpaperDownload.success:
+              case WallpaperStatus.downloaded:
                 return ButtonSetWallpaper(
                   content: const Center(
                     child: Text('Set as wallpaper'),
@@ -75,6 +87,13 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                   onTap: () async {
                     // Set as wallpaper
                   },
+                );
+              case WallpaperStatus.installedWallpaper:
+                return ButtonSetWallpaper(
+                  content: const Center(
+                    child: Text('Installed as as wallpaper'),
+                  ),
+                  onTap: () async {},
                 );
             }
           },

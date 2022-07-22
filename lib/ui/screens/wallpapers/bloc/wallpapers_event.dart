@@ -7,20 +7,32 @@ abstract class WallpapersEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class WallpapersFetched extends WallpapersEvent {}
+class WallpapersFetched extends WallpapersEvent {
+  const WallpapersFetched();
+}
 
-class WallpapersFetchedUpdate extends WallpapersEvent {}
+class WallpapersFetchedFromApi extends WallpapersFetched {
+  const WallpapersFetchedFromApi();
+}
 
-class WallpaperGridModeSwitched extends WallpapersEvent {}
+class WallpapersFetchedFromCache extends WallpapersFetched {
+  const WallpapersFetchedFromCache();
+}
 
-class WallpaperListModeSwitched extends WallpapersEvent {}
+class WallpapersFetchedRestart extends WallpapersEvent {
+  const WallpapersFetchedRestart();
+}
+
+class WallpaperGridModeSwitched extends WallpapersEvent {
+  const WallpaperGridModeSwitched();
+}
+
+class WallpaperListModeSwitched extends WallpapersEvent {
+  const WallpaperListModeSwitched();
+}
 
 class WallpaperDownloaded extends WallpapersEvent {
-  const WallpaperDownloaded(
-    this.wallpaperBloc,
-    this.indexWallpaperInList,
-  );
+  const WallpaperDownloaded(this.wallpaper);
 
-  final WallpaperModelBloc wallpaperBloc;
-  final int indexWallpaperInList;
+  final WallpaperModelBloc wallpaper;
 }

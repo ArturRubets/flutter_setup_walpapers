@@ -19,6 +19,7 @@ WallpaperLocalStorage _$WallpaperLocalStorageFromJson(
       thumbs:
           ThumbsLocalStorage.fromJson(json['thumbs'] as Map<String, dynamic>),
       id: json['id'] as String,
+      isSetWallpaper: json['isSetWallpaper'] as bool,
     );
 
 Map<String, dynamic> _$WallpaperLocalStorageToJson(
@@ -32,13 +33,11 @@ Map<String, dynamic> _$WallpaperLocalStorageToJson(
       'thumbs': instance.thumbs,
       'id': instance.id,
       'imageBytes': instance.imageBytes,
+      'isSetWallpaper': instance.isSetWallpaper,
     };
 
 ThumbsLocalStorage _$ThumbsLocalStorageFromJson(Map<String, dynamic> json) =>
     ThumbsLocalStorage(
-      largeImageBytes: (json['largeImageBytes'] as List<dynamic>?)
-          ?.map((e) => e as int)
-          .toList(),
       originalImageBytes: (json['originalImageBytes'] as List<dynamic>)
           .map((e) => e as int)
           .toList(),
@@ -49,7 +48,6 @@ ThumbsLocalStorage _$ThumbsLocalStorageFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ThumbsLocalStorageToJson(ThumbsLocalStorage instance) =>
     <String, dynamic>{
-      'largeImageBytes': instance.largeImageBytes,
       'originalImageBytes': instance.originalImageBytes,
       'smallImageBytes': instance.smallImageBytes,
     };

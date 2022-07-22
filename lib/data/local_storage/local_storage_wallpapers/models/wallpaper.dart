@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 part 'wallpaper.g.dart';
 
 @JsonSerializable()
@@ -12,6 +13,7 @@ class WallpaperLocalStorage {
     required this.imageBytes,
     required this.thumbs,
     required this.id,
+    required this.isSetWallpaper,
   });
 
   factory WallpaperLocalStorage.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +27,7 @@ class WallpaperLocalStorage {
   final ThumbsLocalStorage thumbs;
   final String id;
   final List<int> imageBytes;
+  final bool isSetWallpaper;
 
   Map<String, dynamic> toJson() => _$WallpaperLocalStorageToJson(this);
 }
@@ -32,7 +35,6 @@ class WallpaperLocalStorage {
 @JsonSerializable()
 class ThumbsLocalStorage {
   const ThumbsLocalStorage({
-    required this.largeImageBytes,
     required this.originalImageBytes,
     required this.smallImageBytes,
   });
@@ -40,7 +42,6 @@ class ThumbsLocalStorage {
   factory ThumbsLocalStorage.fromJson(Map<String, dynamic> json) =>
       _$ThumbsLocalStorageFromJson(json);
 
-  final List<int>? largeImageBytes;
   final List<int> originalImageBytes;
   final List<int> smallImageBytes;
 

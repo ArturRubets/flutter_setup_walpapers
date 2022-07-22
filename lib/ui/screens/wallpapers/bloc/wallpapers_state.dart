@@ -1,6 +1,6 @@
 part of 'wallpapers_bloc.dart';
 
-enum WallpaperStatus { initial, loading, success, failure }
+enum WallpapersScreenStatus { initial, success, failure }
 
 enum WallpaperDisplayMode { grid, list }
 
@@ -9,24 +9,28 @@ class WallpapersState extends Equatable {
     this.wallpapers = const <WallpaperModelBloc>[],
     this.hasReachedMax = false,
     this.currentPage = 1,
-    this.status = WallpaperStatus.initial,
+    this.status = WallpapersScreenStatus.initial,
     this.displayMode = WallpaperDisplayMode.grid,
+    this.isCache = false,
   });
 
+  static const limitWallpapersPerRequestToStorage = 24;
   final List<WallpaperModelBloc> wallpapers;
   final bool hasReachedMax;
   final int currentPage;
-  final WallpaperStatus status;
+  final WallpapersScreenStatus status;
   final WallpaperDisplayMode displayMode;
+  final bool isCache;
 
   @override
-  List<Object?> get props {
+  List<Object> get props {
     return [
       wallpapers,
       hasReachedMax,
       currentPage,
       status,
       displayMode,
+      isCache,
     ];
   }
 
@@ -34,8 +38,9 @@ class WallpapersState extends Equatable {
     List<WallpaperModelBloc>? wallpapers,
     bool? hasReachedMax,
     int? currentPage,
-    WallpaperStatus? status,
+    WallpapersScreenStatus? status,
     WallpaperDisplayMode? displayMode,
+    bool? isCache,
   }) {
     return WallpapersState(
       wallpapers: wallpapers ?? this.wallpapers,
@@ -43,6 +48,7 @@ class WallpapersState extends Equatable {
       currentPage: currentPage ?? this.currentPage,
       status: status ?? this.status,
       displayMode: displayMode ?? this.displayMode,
+      isCache: isCache ?? this.isCache,
     );
   }
 }

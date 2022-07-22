@@ -10,3 +10,9 @@ abstract class WallpaperDetailEvent extends Equatable {
 class WallpaperDetailDownloaded extends WallpaperDetailEvent {
   const WallpaperDetailDownloaded();
 }
+
+// class WallpaperDetailGotImageInBytes extends WallpaperDetailEvent {
+//   const WallpaperDetailGotImageInBytes({this.imageInBytes});
+
+//   final Uint8List? imageInBytes;
+// }

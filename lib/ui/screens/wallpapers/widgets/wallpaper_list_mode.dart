@@ -6,7 +6,7 @@ import '../../../../utils/utils.dart';
 import '../../../common_widgets/common_widgets.dart';
 import '../../../navigation/main_navigation.dart';
 import '../bloc/wallpapers_bloc.dart';
-import '../models/wallpaper.dart';
+import '../models/wallpaper_response.dart';
 
 class WallpaperListMode extends StatelessWidget {
   const WallpaperListMode({super.key});
@@ -34,54 +34,59 @@ class WallpaperListMode extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 9),
-                const _WallpaperSpecificationInfo(),
-                const Spacer(flex: 3),
-                SizedBox(
-                  height: 42,
-                  child: BlocBuilder<WallpapersBloc, WallpapersState>(
-                    builder: (context, state) {
-                      final indexWallpaperInList = context.read<int>();
-                      final wallpaperDownload = state
-                          .wallpapers[indexWallpaperInList].wallpaperDownload;
-                      switch (wallpaperDownload) {
-                        case WallpaperDownload.failure:
-                        case WallpaperDownload.initial:
-                          return ButtonSetWallpaper(
-                            content: const Center(
-                              child: Text('Download'),
-                            ),
-                            onTap: () async {
-                              final wallpaperBloc =
-                                  context.read<WallpaperModelBloc>();
-                              context
-                                  .read<WallpapersBloc>()
-                                  .add(WallpaperDownloaded(
-                                    wallpaperBloc,
-                                    indexWallpaperInList,
-                                  ));
-                            },
-                          );
-                        case WallpaperDownload.loading:
-                          return ButtonSetWallpaper(
-                            content: const Center(
-                              child: Loader(color: AppColors.white),
-                            ),
-                            onTap: () async {},
-                          );
-                        case WallpaperDownload.success:
-                          return ButtonSetWallpaper(
-                            content: const Center(
-                              child: Text('Set as wallpaper'),
-                            ),
-                            onTap: () async {
-                              // Set as wallpaper
-                            },
-                          );
-                      }
-                    },
+                const Expanded(child: _WallpaperSpecificationInfo()),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: BlocBuilder<WallpapersBloc, WallpapersState>(
+                      builder: (context, state) {
+                        final indexWallpaperInList = context.read<int>();
+                        final status = state
+                            .wallpapers[indexWallpaperInList].wallpaperStatus;
+                        switch (status) {
+                          case WallpaperStatus.initial:
+                            return ButtonSetWallpaper(
+                              content: const Center(
+                                child: Text('Download'),
+                              ),
+                              onTap: () async {
+                                final wallpaper =
+                                    context.read<WallpaperModelBloc>();
+                                context
+                                    .read<WallpapersBloc>()
+                                    .add(WallpaperDownloaded(wallpaper));
+                              },
+                            );
+                          case WallpaperStatus.loading:
+                            return ButtonSetWallpaper(
+                              content: const Center(
+                                child: Loader(color: AppColors.white),
+                              ),
+                              onTap: () async {},
+                            );
+                          case WallpaperStatus.downloaded:
+                            return ButtonSetWallpaper(
+                              content: const Center(
+                                child: Text('Set as wallpaper'),
+                              ),
+                              onTap: () async {
+                                // Set as wallpaper
+                              },
+                            );
+                          case WallpaperStatus.installedWallpaper:
+                            return ButtonSetWallpaper(
+                              content: const Center(
+                                child: Text('Installed as as wallpaper'),
+                              ),
+                              onTap: () async {},
+                            );
+                        }
+                      },
+                    ),
                   ),
                 ),
-                const Spacer(flex: 1),
+                const SizedBox(height: 9),
               ],
             ),
           )
@@ -96,8 +101,21 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget =
-        context.read<WallpaperModelBloc>().thumbs.getOriginImageWidget();
+    final wallpaper = context.read<WallpaperModelBloc>();
+    final bytes = wallpaper.thumbs?.thumbSmall?.bytes;
+    final path = wallpaper.thumbs?.thumbSmall?.path;
+    Image? image;
+    if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    } else if (path != null) {
+      image = Image.network(
+        path,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Stack(
       fit: StackFit.expand,
@@ -106,7 +124,7 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: imageWidget,
+            child: image,
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),
@@ -214,6 +232,7 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
     final createdAtFormat = convertDateTime(createdAt);
 
     return Wrap(
+      clipBehavior: Clip.hardEdge,
       runSpacing: 10,
       spacing: 10,
       children: [

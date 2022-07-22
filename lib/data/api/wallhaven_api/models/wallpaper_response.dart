@@ -17,7 +17,7 @@ class WallpaperResponseApi {
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class WallpaperApi {
+class WallpaperApi  {
   const WallpaperApi({
     required this.id,
     required this.url,

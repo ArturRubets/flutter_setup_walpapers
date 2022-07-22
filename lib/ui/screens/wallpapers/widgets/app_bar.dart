@@ -85,7 +85,7 @@ class _ButtonGroup extends StatelessWidget {
                   onTap: () {
                     context
                         .read<WallpapersBloc>()
-                        .add(WallpaperGridModeSwitched());
+                        .add(const WallpaperGridModeSwitched());
                   },
                 ),
                 const SizedBox(width: 5),
@@ -95,7 +95,7 @@ class _ButtonGroup extends StatelessWidget {
                   onTap: () {
                     context
                         .read<WallpapersBloc>()
-                        .add(WallpaperListModeSwitched());
+                        .add(const WallpaperListModeSwitched());
                   },
                 ),
               ],

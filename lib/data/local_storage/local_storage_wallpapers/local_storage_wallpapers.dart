@@ -7,49 +7,61 @@ import 'package:sqflite/sqflite.dart';
 import 'configuration.dart';
 import 'models/wallpaper.dart';
 
+class LocalStorageGetWallpaperNotFoundFailure implements Exception {
+  const LocalStorageGetWallpaperNotFoundFailure();
+}
+
 class LocalStorageWallpapers {
   LocalStorageWallpapers(this.database);
 
   Future<Database> database;
 
-  Future<void> saveWallpaper(
+  Future<bool> saveWallpaper(
     WallpaperLocalStorage wallpaperLocalStorage,
   ) async {
-    final json = await compute(encodeWallpapers, wallpaperLocalStorage);
+    final json = await compute(_encodeWallpapers, wallpaperLocalStorage);
 
     final valuesToSave = {
-      'id': int.tryParse(wallpaperLocalStorage.id),
+      'id': wallpaperLocalStorage.id,
       'json': json,
     };
 
     final db = await database;
 
-    await db.insert(
+    final id = await db.insert(
       sqlTableWallpapers,
       valuesToSave,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+    return id != 0;
   }
 
-  Future<String> encodeWallpapers(
+  Future<String> _encodeWallpapers(
     WallpaperLocalStorage wallpaper,
   ) async {
     return json.encode(wallpaper);
   }
 
-  Future<List<WallpaperLocalStorage>> getWallpapers() async {
-    print(1);
+  Future<List<WallpaperLocalStorage>> getWallpapers(
+    int page, [
+    int limit = 24,
+  ]) async {
     final db = await database;
 
-    final listWallpapersJson = await db.query(sqlTableWallpapers);
-print(2);
-    final wallpapersList = await compute(decodeWallpapers, listWallpapersJson);
-print(3);
+    final offset = (page - 1) * limit;
+    final listWallpapersJson = await db.query(
+      sqlTableWallpapers,
+      limit: limit,
+      offset: offset,
+    );
+
+    final wallpapersList = await compute(_decodeWallpapers, listWallpapersJson);
+  
     return wallpapersList;
   }
 
-  Future<List<WallpaperLocalStorage>> decodeWallpapers(
+  Future<List<WallpaperLocalStorage>> _decodeWallpapers(
     List<Map<String, dynamic>> listWallpapersJson,
   ) async {
     return List.generate(listWallpapersJson.length, (i) {
@@ -58,5 +70,20 @@ print(3);
 
       return WallpaperLocalStorage.fromJson(map);
     });
+  }
+
+  Future<WallpaperLocalStorage> getWallpaper(String id) async {
+    final db = await database;
+
+    final listWallpapersJson =
+        await db.query(sqlTableWallpapers, where: 'id = ?', whereArgs: [id]);
+
+    final wallpapersList = await compute(_decodeWallpapers, listWallpapersJson);
+
+    if (wallpapersList.isEmpty) {
+      throw const LocalStorageGetWallpaperNotFoundFailure();
+    }
+
+    return wallpapersList.first;
   }
 }

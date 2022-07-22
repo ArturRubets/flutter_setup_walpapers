@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../resources/resources.dart';
 import '../../../../utils/utils.dart';
 import '../../../navigation/main_navigation.dart';
-import '../models/wallpaper.dart';
+import '../models/wallpaper_response.dart';
 
 class WallpaperGridMode extends StatelessWidget {
   const WallpaperGridMode({super.key});
@@ -56,8 +57,21 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget =
-        context.read<WallpaperModelBloc>().thumbs.getSmallImageWidget();
+    final wallpaper = context.read<WallpaperModelBloc>();
+    final bytes = wallpaper.thumbs?.thumbOrigin?.bytes;
+    final path = wallpaper.thumbs?.thumbOrigin?.path;
+    Image? image;
+    if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    } else if (path != null) {
+      image = Image.network(
+        path,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Stack(
       fit: StackFit.expand,
@@ -66,7 +80,7 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: imageWidget,
+            child: image,
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),

@@ -42,7 +42,7 @@ class WallhavenApiClient {
     return WallpaperResponseApi.fromJson(json);
   }
 
-  Future<Uint8List?> imageFromNetworkToBytes(String path) async {
+  Future<Uint8List?> imageFromNetworkInBytes(String path) async {
     try {
       final response = await http.get(Uri.parse(path));
       return response.bodyBytes;

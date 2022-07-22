@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../../../data/local_storage/local_storage_wallpapers/local_storage_wallpapers.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/models/wallpaper.dart';
 import '../../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 import '../../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
-import '../models/wallpaper.dart';
+import '../models/wallpaper_response.dart';
 
 part 'wallpapers_event.dart';
 part 'wallpapers_state.dart';
@@ -28,8 +30,16 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       _onFetched,
       transformer: _throttleDroppable(_throttleDuration),
     );
-    on<WallpapersFetchedUpdate>(
-      _onFetchedUpdate,
+    on<WallpapersFetchedFromApi>(
+      _onFetchedFromApi,
+      transformer: _throttleDroppable(_throttleDuration),
+    );
+    on<WallpapersFetchedFromCache>(
+      _onFetchedFromCache,
+      transformer: _throttleDroppable(_throttleDuration),
+    );
+    on<WallpapersFetchedRestart>(
+      _onFetchedRestart,
       transformer: _throttleDroppable(_throttleDuration),
     );
     on<WallpaperGridModeSwitched>(
@@ -48,192 +58,286 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
   FutureOr<void> _onFetched(
     WallpapersFetched event,
     Emitter<WallpapersState> emit,
+  ) {
+    if (state.isCache) {
+      add(const WallpapersFetchedFromCache());
+    } else {
+      add(const WallpapersFetchedFromApi());
+    }
+  }
+
+  FutureOr<void> _onFetchedFromApi(
+    WallpapersFetchedFromApi event,
+    Emitter<WallpapersState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    if (state.hasReachedMax) {
+      emit(state.copyWith(status: WallpapersScreenStatus.success));
+      return;
+    }
+
     try {
-      if (state.status == WallpaperStatus.initial ||
-          state.status == WallpaperStatus.loading) {
-        final wallpapers = await _fetchWallpapersFromApi(state.currentPage);
-        final hasReachedMax = _hasReachedMax(wallpapers);
+      if (state.status == WallpapersScreenStatus.initial) {
+        final response =
+            await _wallpaperRepository.getWallpaperFromApi(state.currentPage);
+
+        final wallpapers = response.data.map(_createWallpaperFromApi).toList();
+
+        final updatedWallpapersFromStorage =
+            await _updateWallpapersFromStorage(wallpapers);
+
+        final hasReachedMaxValue = _hasReachedMax(response.meta);
 
         return emit(
           state.copyWith(
-            wallpapers: wallpapers.data,
-            hasReachedMax: hasReachedMax,
-            currentPage: wallpapers.meta.currentPage,
-            status: WallpaperStatus.success,
+            wallpapers: updatedWallpapersFromStorage,
+            hasReachedMax: hasReachedMaxValue,
+            currentPage: response.meta.currentPage,
+            status: WallpapersScreenStatus.success,
           ),
         );
       }
 
-      final wallpapers = await _fetchWallpapersFromApi(state.currentPage + 1);
-      final hasReachedMax = _hasReachedMax(wallpapers);
+      final response =
+          await _wallpaperRepository.getWallpaperFromApi(state.currentPage + 1);
+      final wallpapers = response.data.map(_createWallpaperFromApi).toList();
+
+      final updatedWallpapersFromStorage =
+          await _updateWallpapersFromStorage(wallpapers);
+
+      final hasReachedMaxValue = _hasReachedMax(response.meta);
+
       emit(
         state.copyWith(
-          wallpapers: List.of(state.wallpapers)..addAll(wallpapers.data),
-          hasReachedMax: hasReachedMax,
-          status: WallpaperStatus.success,
-          currentPage: wallpapers.meta.currentPage,
+          wallpapers: List.of(state.wallpapers)
+            ..addAll(updatedWallpapersFromStorage),
+          hasReachedMax: hasReachedMaxValue,
+          currentPage: response.meta.currentPage,
+          status: WallpapersScreenStatus.success,
         ),
       );
     } on SocketException {
-      final wallpapers = (await _createAllWallpapersBlocFromCache()).data;
       emit(
         state.copyWith(
-          wallpapers: wallpapers,
-          status: WallpaperStatus.success,
-          hasReachedMax: true,
+          isCache: true,
+          hasReachedMax: false,
+          status: WallpapersScreenStatus.initial,
         ),
       );
+      add(const WallpapersFetchedFromCache());
     } catch (_) {
-      emit(state.copyWith(status: WallpaperStatus.failure));
+      emit(state.copyWith(status: WallpapersScreenStatus.failure));
     }
   }
 
-  FutureOr<void> _onFetchedUpdate(
-    WallpapersFetchedUpdate event,
+  FutureOr<void> _onFetchedFromCache(
+    WallpapersFetchedFromCache event,
+    Emitter<WallpapersState> emit,
+  ) async {
+    if (state.hasReachedMax) {
+      emit(state.copyWith(status: WallpapersScreenStatus.success));
+      return;
+    }
+
+    try {
+      if (state.status == WallpapersScreenStatus.initial) {
+        final response = await _wallpaperRepository.getWallpapersFromStorage(
+          state.currentPage,
+          WallpapersState.limitWallpapersPerRequestToStorage,
+        );
+
+        final wallpapers = response.map(_createWallpaperFromCache).toList();
+        final hasReachedMaxValue = wallpapers.length <
+                WallpapersState.limitWallpapersPerRequestToStorage
+            ? true
+            : false;
+
+        return emit(
+          state.copyWith(
+            wallpapers: wallpapers,
+            hasReachedMax: hasReachedMaxValue,
+            currentPage: 1,
+            status: WallpapersScreenStatus.success,
+          ),
+        );
+      }
+
+      final currentPage = state.currentPage + 1;
+      final response =
+          await _wallpaperRepository.getWallpapersFromStorage(currentPage);
+      final hasReachedMaxValue = response.isEmpty;
+      final wallpapers = response.map(_createWallpaperFromCache).toList();
+
+      emit(
+        state.copyWith(
+          wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
+          hasReachedMax: hasReachedMaxValue,
+          currentPage: currentPage,
+          status: WallpapersScreenStatus.success,
+        ),
+      );
+    } catch (_) {
+      emit(state.copyWith(status: WallpapersScreenStatus.failure));
+    }
+  }
+
+  FutureOr<void> _onFetchedRestart(
+    WallpapersFetchedRestart event,
     Emitter<WallpapersState> emit,
   ) async {
     emit(state.copyWith(
       currentPage: 1,
-      status: WallpaperStatus.loading,
+      status: WallpapersScreenStatus.initial,
+      isCache: false,
+      hasReachedMax: false,
     ));
 
-    add(WallpapersFetched());
+    add(const WallpapersFetchedFromApi());
   }
 
   FutureOr<void> _onGridModeSwitched(
-      WallpaperGridModeSwitched event, Emitter<WallpapersState> emit) {
+    WallpaperGridModeSwitched event,
+    Emitter<WallpapersState> emit,
+  ) {
     if (state.displayMode == WallpaperDisplayMode.list) {
       emit(state.copyWith(displayMode: WallpaperDisplayMode.grid));
     }
   }
 
   FutureOr<void> _onListModeSwitched(
-      WallpaperListModeSwitched event, Emitter<WallpapersState> emit) {
+    WallpaperListModeSwitched event,
+    Emitter<WallpapersState> emit,
+  ) {
     if (state.displayMode == WallpaperDisplayMode.grid) {
       emit(state.copyWith(displayMode: WallpaperDisplayMode.list));
     }
-  }
-
-  bool _hasReachedMax(WallpaperResponseBloc wallpapers) {
-    final lastPage = wallpapers.meta.lastPage;
-    final currentPage = wallpapers.meta.currentPage;
-    return lastPage == currentPage;
-  }
-
-  Future<WallpaperResponseBloc> _fetchWallpapersFromApi(
-    int page,
-  ) async {
-    final wallpapersApi = await _wallpaperRepository.getWallpaper(page);
-    final wallpapersBloc =
-        wallpapersApi.data.map(_createWallpaperBlocFromApi).toList();
-
-    return WallpaperResponseBloc(
-      data: wallpapersBloc,
-      meta: MetaBloc(
-        currentPage: wallpapersApi.meta.currentPage,
-        lastPage: wallpapersApi.meta.lastPage,
-      ),
-    );
-  }
-
-  Future<WallpaperResponseBloc> _createAllWallpapersBlocFromCache() async {
-    final wallpaperStorage =
-        await _wallpaperRepository.getWallpaperFromStorage();
-    final wallpapers = wallpaperStorage
-        .map<WallpaperModelBloc>(_createWallpaperBlocFromCache)
-        .toList();
-    return WallpaperResponseBloc(
-      data: wallpapers,
-      meta: const MetaBloc(
-        currentPage: 1,
-        lastPage: 1,
-      ),
-    );
-  }
-
-  WallpaperModelBloc _createWallpaperBlocFromCache(WallpaperLocalStorage w) {
-    return WallpaperModelBloc(
-      favorites: w.favorites,
-      category: w.category,
-      resolution: w.resolution,
-      fileSizeBytes: w.fileSizeBytes,
-      createdAt: w.createdAt,
-      path: null,
-      thumbs: ThumbsBloc(
-        original: null,
-        small: null,
-        thumbOriginalBytes: w.thumbs.originalImageBytes,
-        thumbSmallBytes: w.thumbs.smallImageBytes,
-      ),
-      id: w.id,
-      imageBytes: w.imageBytes,
-      isFromCache: true,
-      wallpaperDownload: WallpaperDownload.success,
-    );
-  }
-
-  WallpaperModelBloc _createWallpaperBlocFromApi(WallpaperDomain w) {
-    return WallpaperModelBloc(
-      favorites: w.favorites,
-      category: w.category,
-      resolution: w.resolution,
-      fileSizeBytes: w.fileSizeBytes,
-      createdAt: w.createdAt,
-      path: w.path,
-      thumbs: ThumbsBloc(
-        original: w.thumbs.original,
-        small: w.thumbs.small,
-        thumbOriginalBytes: null,
-        thumbSmallBytes: null,
-      ),
-      id: w.id,
-      imageBytes: null,
-      isFromCache: false,
-      wallpaperDownload: WallpaperDownload.initial,
-    );
   }
 
   FutureOr<void> _onWallpaperDownloaded(
     WallpaperDownloaded event,
     Emitter<WallpapersState> emit,
   ) async {
-    final eventWallpaper = event.wallpaperBloc;
-    final eventIndex = event.indexWallpaperInList;
-
     emit(
       state.copyWith(
-        wallpapers: _updateWallpaperDownloadList(
-          eventIndex,
-          WallpaperDownload.loading,
+        wallpapers: _updateWallpaperStatus(
+          event.wallpaper,
+          WallpaperStatus.loading,
         ),
       ),
     );
 
-    if (!event.wallpaperBloc.isFromCache) {
-      await _wallpaperRepository.saveWallpaperInStorage(eventWallpaper);
+    if (!event.wallpaper.isFromCache) {
+      final isSave =
+          await _wallpaperRepository.saveWallpaperInStorage(event.wallpaper);
+      if (isSave) {
+        emit(
+          state.copyWith(
+            wallpapers: _updateWallpaperStatus(
+              event.wallpaper,
+              WallpaperStatus.downloaded,
+            ),
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            wallpapers: _updateWallpaperStatus(
+              event.wallpaper,
+              WallpaperStatus.initial,
+            ),
+          ),
+        );
+      }
     }
+  }
 
-    emit(
-      state.copyWith(
-        wallpapers: _updateWallpaperDownloadList(
-          eventIndex,
-          WallpaperDownload.success,
+  bool _hasReachedMax(MetaDomain meta) => meta.lastPage == meta.currentPage;
+
+  WallpaperModelBloc _createWallpaperFromApi(WallpaperModelDomain wallpaper) {
+    final w = wallpaper;
+    return WallpaperModelBloc(
+      id: w.id,
+      favorites: w.favorites,
+      category: w.category,
+      resolution: w.resolution,
+      fileSizeBytes: w.fileSizeBytes,
+      createdAt: w.createdAt,
+      mainImage: ImageWallpaperDomain(
+        bytes: null,
+        path: w.mainImage?.path,
+      ),
+      thumbs: ThumbsDomain(
+        thumbOrigin: ImageWallpaperDomain(
+          bytes: null,
+          path: w.thumbs?.thumbOrigin?.path,
+        ),
+        thumbSmall: ImageWallpaperDomain(
+          bytes: null,
+          path: w.thumbs?.thumbSmall?.path,
         ),
       ),
+      isFromCache: false,
+      wallpaperStatus: WallpaperStatus.initial,
     );
   }
 
-  List<WallpaperModelBloc> _updateWallpaperDownloadList(
-    int eventIndex,
-    WallpaperDownload status,
+  WallpaperModelBloc _createWallpaperFromCache(
+      WallpaperLocalStorage wallpaper) {
+    final w = wallpaper;
+    return WallpaperModelBloc(
+      id: w.id,
+      favorites: w.favorites,
+      category: w.category,
+      resolution: w.resolution,
+      fileSizeBytes: w.fileSizeBytes,
+      createdAt: w.createdAt,
+      mainImage: ImageWallpaperDomain(
+        bytes: Uint8List.fromList(w.imageBytes),
+        path: null,
+      ),
+      thumbs: ThumbsDomain(
+        thumbOrigin: ImageWallpaperDomain(
+          bytes: Uint8List.fromList(w.thumbs.originalImageBytes),
+          path: null,
+        ),
+        thumbSmall: ImageWallpaperDomain(
+          bytes: Uint8List.fromList(w.thumbs.smallImageBytes),
+          path: null,
+        ),
+      ),
+      isFromCache: true,
+      wallpaperStatus: w.isSetWallpaper
+          ? WallpaperStatus.installedWallpaper
+          : WallpaperStatus.downloaded,
+    );
+  }
+
+  List<WallpaperModelBloc> _updateWallpaperStatus(
+    WallpaperModelBloc wallpaper,
+    WallpaperStatus status,
   ) {
-    var wallpaperUpdate = List<WallpaperModelBloc>.from(state.wallpapers);
+    final wallpapers = List<WallpaperModelBloc>.from(state.wallpapers);
+    final index = _getIndex(wallpapers, wallpaper.id);
+    wallpapers[index] = wallpapers[index].copyWith(wallpaperStatus: status);
+    return wallpapers;
+  }
 
-    wallpaperUpdate[eventIndex] =
-        wallpaperUpdate[eventIndex].copyWith(wallpaperDownload: status);
+  int _getIndex(List<WallpaperModelBloc> wallpapers, String wallpaperId) {
+    return wallpapers.indexWhere((element) => element.id == wallpaperId);
+  }
 
-    return wallpaperUpdate;
+  Future<List<WallpaperModelBloc>> _updateWallpapersFromStorage(
+    List<WallpaperModelBloc> wallpapers,
+  ) async {
+    final updated = <WallpaperModelBloc>[];
+    for (final element in wallpapers) {
+      try {
+        final storageWallpaper =
+            await _wallpaperRepository.getWallpaperFromStorage(element.id);
+        updated.add(_createWallpaperFromCache(storageWallpaper));
+      } on LocalStorageGetWallpaperNotFoundFailure {
+        updated.add(element);
+      }
+    }
+    return updated;
   }
 }

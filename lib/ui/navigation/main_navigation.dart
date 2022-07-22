@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
 import '../screens/wallpaper_detail/bloc/wallpaper_detail_bloc.dart';
 import '../screens/wallpaper_detail/view/wallpaper_detail_page.dart';
-import '../screens/wallpapers/models/wallpaper.dart';
+import '../screens/wallpapers/models/wallpaper_response.dart';
 import '../screens/wallpapers/wallpapers.dart';
 
 abstract class MainNavigationRouteNames {

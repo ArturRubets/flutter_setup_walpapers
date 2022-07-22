@@ -4,16 +4,19 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../domain/repositories/wallpaper_repository/src/wallpaper_repository.dart';
-import '../../wallpapers/models/wallpaper.dart';
+import '../../wallpapers/models/wallpaper_response.dart';
 
 part 'wallpaper_detail_event.dart';
 part 'wallpaper_detail_state.dart';
 
 class WallpaperDetailBloc
     extends Bloc<WallpaperDetailEvent, WallpaperDetailState> {
-  WallpaperDetailBloc(this._wallpaperRepository, WallpaperModelBloc wallpaper)
-      : super(WallpaperDetailState(wallpaper)) {
+  WallpaperDetailBloc(
+    this._wallpaperRepository,
+    WallpaperModelBloc wallpaper,
+  ) : super(WallpaperDetailState(wallpaper)) {
     on<WallpaperDetailDownloaded>(_onWallpaperDetailDownloaded);
+    // on<WallpaperDetailGotImageInBytes>(_onWallpaperDetailGotImageInBytes);
   }
 
   final WallpaperRepository _wallpaperRepository;
@@ -25,7 +28,7 @@ class WallpaperDetailBloc
     emit(
       state.copyWith(
         wallpaper: state.wallpaper.copyWith(
-          wallpaperDownload: WallpaperDownload.loading,
+          wallpaperStatus: WallpaperStatus.loading,
         ),
       ),
     );
@@ -37,9 +40,44 @@ class WallpaperDetailBloc
     emit(
       state.copyWith(
         wallpaper: state.wallpaper.copyWith(
-          wallpaperDownload: WallpaperDownload.success,
+          wallpaperStatus: WallpaperStatus.downloaded,
         ),
       ),
     );
   }
+
+  // FutureOr<void> _onWallpaperDetailGotImageInBytes(
+  //   WallpaperDetailGotImageInBytes event,
+  //   Emitter<WallpaperDetailState> emit,
+  // ) {
+  //   emit(
+  //     state.copyWith(
+  //       wallpaper: state.wallpaper.copyWith(imageBytes: event.imageInBytes),
+  //     ),
+  //   );
+  // }
+
+  // Future<Image?> getImageWidget(String? path, List<int>? imageBytes) async {
+  //   Image? image;
+  //   if (imageBytes != null) {
+  //     image = Image.memory(
+  //       Uint8List.fromList(imageBytes),
+  //       fit: BoxFit.cover,
+  //     );
+  //   } else if (path != null) {
+  //     final imageBytesFromPath =
+  //         await _wallpaperRepository.imageFromNetworkInBytes(path);
+
+  //     add(WallpaperDetailGotImageInBytes(imageInBytes: imageBytesFromPath));
+
+  //     if (imageBytesFromPath != null) {
+  //       image = Image.memory(
+  //         Uint8List.fromList(imageBytesFromPath),
+  //         fit: BoxFit.cover,
+  //       );
+  //     }
+  //   }
+  //   return image;
+  // }
+
 }
