@@ -13,18 +13,17 @@ class WallpaperDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final paddingFromSystemBar = MediaQuery.of(context).padding.top;
-    final wallpaper = context.read<WallpaperDetailBloc>().state.wallpaper;
-    final bytes = wallpaper.mainImage?.bytes;
-    final path = wallpaper.mainImage?.path;
+
+    final wallpaper = context.watch<WallpaperDetailBloc>().state.wallpaper;
+    final bytes = wallpaper.mainImageBytesFromApi.bytes;
     Image? image;
-    if (bytes != null) {
+    if (bytes == null) {
+      context
+          .read<WallpaperDetailBloc>()
+          .add(const WallpaperDetailGotImageInBytes());
+    } else {
       image = Image.memory(
         bytes,
-        fit: BoxFit.cover,
-      );
-    } else if (path != null) {
-      image = Image.network(
-        path,
         fit: BoxFit.cover,
       );
     }

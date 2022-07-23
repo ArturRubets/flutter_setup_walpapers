@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../resources/resources.dart';
 import '../../../../utils/utils.dart';
@@ -61,22 +60,27 @@ class _WallpaperPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wallpaperId = context.read<String>();
-    // final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+    final wallpaper = context.select<WallpapersBloc, WallpaperModelBloc?>(
+      (value) {
+        if (value.state.wallpapers.isEmpty) return null;
 
-    // final bytes = wallpaper.thumbs?.thumbOrigin?.bytes;
-    // final path = wallpaper.thumbs?.thumbOrigin?.path;
-    // Image? image;
-    // if (bytes != null) {
-    //   image = Image.memory(
-    //     bytes,
-    //     fit: BoxFit.cover,
-    //   );
-    // } else if (path != null) {
-    //   image = Image.network(
-    //     path,
-    //     fit: BoxFit.cover,
-    //   );
-    // }
+        return value.state.wallpapers
+            .firstWhere((element) => element.id == wallpaperId);
+      },
+    );
+
+    final bytes = wallpaper?.thumbOriginalImageBytesFromApi.bytes;
+    Image? image;
+    if (wallpaper != null && bytes == null) {
+      context
+          .read<WallpapersBloc>()
+          .add(WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
+    } else if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Stack(
       fit: StackFit.expand,
@@ -85,24 +89,7 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: BlocSelector<WallpapersBloc, WallpapersState,
-                WallpaperModelBloc>(
-              selector: (state) => state.wallpapers
-                  .firstWhere((element) => element.id == wallpaperId),
-              builder: (context, wallpaper) {
-                final bytes = wallpaper.thumbOriginalImageBytesFromApi.bytes;
-                if (bytes == null) {
-                  context.read<WallpapersBloc>().add(
-                      WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
-                  return const SizedBox.shrink();
-                } else {
-                  return Image.memory(
-                    bytes,
-                    fit: BoxFit.cover,
-                  );
-                }
-              },
-            ),
+            child: image,
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),

@@ -111,6 +111,28 @@ class _WallpaperPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wallpaperId = context.read<String>();
+    final wallpaper = context.select<WallpapersBloc, WallpaperModelBloc?>(
+      (value) {
+        if (value.state.wallpapers.isEmpty) return null;
+
+        return value.state.wallpapers
+            .firstWhere((element) => element.id == wallpaperId);
+      },
+    );
+
+    final bytes = wallpaper?.thumbOriginalImageBytesFromApi.bytes;
+    Image? image;
+    if (wallpaper != null && bytes == null) {
+      context
+          .read<WallpapersBloc>()
+          .add(WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
+    } else if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    }
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -118,24 +140,7 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: BlocSelector<WallpapersBloc, WallpapersState,
-                WallpaperModelBloc>(
-              selector: (state) => state.wallpapers
-                  .firstWhere((element) => element.id == wallpaperId),
-              builder: (context, wallpaper) {
-                final bytes = wallpaper.thumbSmallImageBytesFromApi.bytes;
-                if (bytes == null) {
-                  context.read<WallpapersBloc>().add(
-                      WallpaperDetailThumbSmallGotBytes(wallpaper: wallpaper));
-                  return const SizedBox.shrink();
-                } else {
-                  return Image.memory(
-                    bytes,
-                    fit: BoxFit.cover,
-                  );
-                }
-              },
-            ),
+            child: image,
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),

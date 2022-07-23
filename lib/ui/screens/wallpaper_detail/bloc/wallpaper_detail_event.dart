@@ -11,8 +11,7 @@ class WallpaperDetailDownloaded extends WallpaperDetailEvent {
   const WallpaperDetailDownloaded();
 }
 
-// class WallpaperDetailGotImageInBytes extends WallpaperDetailEvent {
-//   const WallpaperDetailGotImageInBytes({this.imageInBytes});
+class WallpaperDetailGotImageInBytes extends WallpaperDetailEvent {
+  const WallpaperDetailGotImageInBytes();
 
-//   final Uint8List? imageInBytes;
-// }
+}

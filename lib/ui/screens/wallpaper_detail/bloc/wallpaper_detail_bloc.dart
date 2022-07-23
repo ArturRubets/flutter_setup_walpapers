@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -16,7 +17,7 @@ class WallpaperDetailBloc
     WallpaperModelBloc wallpaper,
   ) : super(WallpaperDetailState(wallpaper)) {
     on<WallpaperDetailDownloaded>(_onWallpaperDetailDownloaded);
-    // on<WallpaperDetailGotImageInBytes>(_onWallpaperDetailGotImageInBytes);
+    on<WallpaperDetailGotImageInBytes>(_onWallpaperDetailGotImageInBytes);
   }
 
   final WallpaperRepository _wallpaperRepository;
@@ -34,50 +35,54 @@ class WallpaperDetailBloc
     );
 
     if (!state.wallpaper.isFromCache) {
-      await _wallpaperRepository.saveWallpaperInStorage(state.wallpaper);
+      final isSave = await _wallpaperRepository.saveWallpaperInStorage(
+        state.wallpaper,
+        state.wallpaper.mainImageBytesFromApi.bytes,
+        state.wallpaper.thumbSmallImageBytesFromApi.bytes,
+        state.wallpaper.thumbOriginalImageBytesFromApi.bytes,
+      );
+      if (isSave) {
+        emit(
+          state.copyWith(
+            wallpaper: state.wallpaper.copyWith(
+              wallpaperStatus: WallpaperStatus.downloaded,
+            ),
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            wallpaper: state.wallpaper.copyWith(
+              wallpaperStatus: WallpaperStatus.initial,
+            ),
+          ),
+        );
+      }
     }
-
-    emit(
-      state.copyWith(
-        wallpaper: state.wallpaper.copyWith(
-          wallpaperStatus: WallpaperStatus.downloaded,
-        ),
-      ),
-    );
   }
 
-  // FutureOr<void> _onWallpaperDetailGotImageInBytes(
-  //   WallpaperDetailGotImageInBytes event,
-  //   Emitter<WallpaperDetailState> emit,
-  // ) {
-  //   emit(
-  //     state.copyWith(
-  //       wallpaper: state.wallpaper.copyWith(imageBytes: event.imageInBytes),
-  //     ),
-  //   );
-  // }
+  FutureOr<void> _onWallpaperDetailGotImageInBytes(
+    WallpaperDetailGotImageInBytes event,
+    Emitter<WallpaperDetailState> emit,
+  ) async {
+    final mainImage = state.wallpaper.mainImage;
+    final bytes = mainImage?.bytes;
+    final path = mainImage?.path;
 
-  // Future<Image?> getImageWidget(String? path, List<int>? imageBytes) async {
-  //   Image? image;
-  //   if (imageBytes != null) {
-  //     image = Image.memory(
-  //       Uint8List.fromList(imageBytes),
-  //       fit: BoxFit.cover,
-  //     );
-  //   } else if (path != null) {
-  //     final imageBytesFromPath =
-  //         await _wallpaperRepository.imageFromNetworkInBytes(path);
+    if (bytes != null) {
+      final newWallpaper = state.wallpaper
+          .copyWith(mainImageBytesFromApi: CacheImageBytes(bytes: bytes));
 
-  //     add(WallpaperDetailGotImageInBytes(imageInBytes: imageBytesFromPath));
+      emit(state.copyWith(wallpaper: newWallpaper));
+    } else if (path != null) {
+      final bytes = await _wallpaperRepository.imageFromNetworkInBytes(path);
 
-  //     if (imageBytesFromPath != null) {
-  //       image = Image.memory(
-  //         Uint8List.fromList(imageBytesFromPath),
-  //         fit: BoxFit.cover,
-  //       );
-  //     }
-  //   }
-  //   return image;
-  // }
+      if (bytes != null) {
+        final newWallpaper = state.wallpaper
+            .copyWith(mainImageBytesFromApi: CacheImageBytes(bytes: bytes));
 
+        emit(state.copyWith(wallpaper: newWallpaper));
+      }
+    }
+  }
 }

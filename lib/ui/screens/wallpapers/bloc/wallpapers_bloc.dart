@@ -16,6 +16,10 @@ import '../models/wallpaper_response.dart';
 part 'wallpapers_event.dart';
 part 'wallpapers_state.dart';
 
+class WallpapersEmpty implements Exception {
+  const WallpapersEmpty();
+}
+
 const _throttleDuration = Duration(milliseconds: 100);
 
 EventTransformer<E> _throttleDroppable<E>(Duration duration) {
@@ -84,40 +88,51 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
 
     try {
+      final int currentPage;
       if (state.status == WallpapersScreenStatus.initial) {
-        final response =
-            await _wallpaperRepository.getWallpaperFromApi(state.currentPage);
-
-        final wallpapers = await _getWallpaperFromApi(response);
-
-        final hasReachedMaxValue = _hasReachedMax(response.meta);
-
-        return emit(
-          state.copyWith(
-            wallpapers: wallpapers,
-            hasReachedMax: hasReachedMaxValue,
-            currentPage: response.meta.currentPage,
-            status: WallpapersScreenStatus.success,
-          ),
-        );
+        currentPage = state.currentPage;
+      } else {
+        currentPage = state.currentPage + 1;
       }
 
       final response =
-          await _wallpaperRepository.getWallpaperFromApi(state.currentPage + 1);
+          await _wallpaperRepository.getWallpaperFromApi(currentPage);
+
+      if (response.data.isEmpty) throw const WallpapersEmpty();
 
       final wallpapers = await _getWallpaperFromApi(response);
 
       final hasReachedMaxValue = _hasReachedMax(response.meta);
 
+      if (state.status == WallpapersScreenStatus.initial) {
+        emit(
+          state.copyWith(
+            wallpapers: wallpapers,
+            hasReachedMax: hasReachedMaxValue,
+            currentPage: currentPage,
+            status: WallpapersScreenStatus.success,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
+            hasReachedMax: hasReachedMaxValue,
+            currentPage: currentPage,
+            status: WallpapersScreenStatus.success,
+          ),
+        );
+      }
+    } on SocketException {
       emit(
         state.copyWith(
-          wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
-          hasReachedMax: hasReachedMaxValue,
-          currentPage: response.meta.currentPage,
-          status: WallpapersScreenStatus.success,
+          isCache: true,
+          hasReachedMax: false,
+          status: WallpapersScreenStatus.initial,
         ),
       );
-    } on SocketException {
+      add(const WallpapersFetchedFromCache());
+    } on WallpapersEmpty {
       emit(
         state.copyWith(
           isCache: true,
@@ -141,44 +156,45 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
 
     try {
+      final int currentPage;
       if (state.status == WallpapersScreenStatus.initial) {
-        final response = await _wallpaperRepository.getWallpapersFromStorage(
-          state.currentPage,
-          WallpapersState.limitWallpapersPerRequestToStorage,
-        );
+        currentPage = state.currentPage;
+      } else {
+        currentPage = state.currentPage + 1;
+      }
 
-        
+      final response = await _wallpaperRepository.getWallpapersFromStorage(
+        currentPage,
+        WallpapersState.limitWallpapersPerRequestToStorage,
+      );
 
-        final wallpapers = response.map(_createWallpaperFromCache).toList();
-        final hasReachedMaxValue = wallpapers.length <
-                WallpapersState.limitWallpapersPerRequestToStorage
-            ? true
-            : false;
+      if (response.isEmpty) throw const WallpapersEmpty();
 
-        return emit(
+      final wallpapers = response.map(_createWallpaperFromCache).toList();
+      final hasReachedMaxValue =
+          wallpapers.length < WallpapersState.limitWallpapersPerRequestToStorage
+              ? true
+              : false;
+
+      if (state.status == WallpapersScreenStatus.initial) {
+        emit(
           state.copyWith(
             wallpapers: wallpapers,
             hasReachedMax: hasReachedMaxValue,
-            currentPage: 1,
+            currentPage: currentPage,
+            status: WallpapersScreenStatus.success,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
+            hasReachedMax: hasReachedMaxValue,
+            currentPage: currentPage,
             status: WallpapersScreenStatus.success,
           ),
         );
       }
-
-      final currentPage = state.currentPage + 1;
-      final response =
-          await _wallpaperRepository.getWallpapersFromStorage(currentPage);
-      final wallpapers = response.map(_createWallpaperFromCache).toList();
-      final hasReachedMaxValue = response.isEmpty;
-
-      emit(
-        state.copyWith(
-          wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
-          hasReachedMax: hasReachedMaxValue,
-          currentPage: currentPage,
-          status: WallpapersScreenStatus.success,
-        ),
-      );
     } catch (_) {
       emit(state.copyWith(status: WallpapersScreenStatus.failure));
     }
@@ -193,6 +209,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       status: WallpapersScreenStatus.initial,
       isCache: false,
       hasReachedMax: false,
+      wallpapers: [],
     ));
 
     add(const WallpapersFetchedFromApi());
