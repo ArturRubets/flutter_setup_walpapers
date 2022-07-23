@@ -14,8 +14,8 @@ class WallpapersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => WallpapersBloc(context.read<WallpaperRepository>())
-        ..add(const WallpapersFetchedFromApi()),
+      create: (context) => WallpapersBloc(context.read<WallpaperRepository>())
+        ..add(const WallpapersFetched()),
       child: const WallpapersView(),
     );
   }
@@ -90,17 +90,12 @@ class _WallpapersViewState extends State<WallpapersView> {
                       controller: _scrollController,
                       itemCount: itemCount,
                       gridDelegate: gridDelegate,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (_, index) {
                         if (index >= state.wallpapers.length) {
                           return const Loader();
                         }
-                        final wallpaper = state.wallpapers[index];
-
-                        return MultiProvider(
-                          providers: [
-                            Provider(create: (_) => wallpaper),
-                            Provider(create: (_) => index),
-                          ],
+                        return Provider(
+                          create: (_) => state.wallpapers[index].id,
                           child: isGridMode
                               ? wallpaperGridMode
                               : wallpaperListMode,
@@ -117,7 +112,6 @@ class _WallpapersViewState extends State<WallpapersView> {
                         width: 60,
                       ),
                     );
-
                   case WallpapersScreenStatus.failure:
                     return Expanded(
                       child: Stack(
@@ -133,7 +127,6 @@ class _WallpapersViewState extends State<WallpapersView> {
                         ],
                       ),
                     );
-
                   case WallpapersScreenStatus.success:
                     return listWallpapers;
                 }

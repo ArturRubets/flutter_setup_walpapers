@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../resources/resources.dart';
 import '../../../../utils/utils.dart';
 import '../../../navigation/main_navigation.dart';
+import '../bloc/wallpapers_bloc.dart';
 import '../models/wallpaper_response.dart';
 
 class WallpaperGridMode extends StatelessWidget {
@@ -39,7 +40,9 @@ class WallpaperGridMode extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              final wallpaper = context.read<WallpaperModelBloc>();
+              final wallpaperId = context.read<String>();
+              final wallpaper =
+                  context.read<WallpapersBloc>().findById(wallpaperId);
               Navigator.of(context).pushNamed(
                 MainNavigationRouteNames.wallpaperScreenDetail,
                 arguments: wallpaper,
@@ -57,21 +60,23 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wallpaper = context.read<WallpaperModelBloc>();
-    final bytes = wallpaper.thumbs?.thumbOrigin?.bytes;
-    final path = wallpaper.thumbs?.thumbOrigin?.path;
-    Image? image;
-    if (bytes != null) {
-      image = Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-      );
-    } else if (path != null) {
-      image = Image.network(
-        path,
-        fit: BoxFit.cover,
-      );
-    }
+    final wallpaperId = context.read<String>();
+    // final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+
+    // final bytes = wallpaper.thumbs?.thumbOrigin?.bytes;
+    // final path = wallpaper.thumbs?.thumbOrigin?.path;
+    // Image? image;
+    // if (bytes != null) {
+    //   image = Image.memory(
+    //     bytes,
+    //     fit: BoxFit.cover,
+    //   );
+    // } else if (path != null) {
+    //   image = Image.network(
+    //     path,
+    //     fit: BoxFit.cover,
+    //   );
+    // }
 
     return Stack(
       fit: StackFit.expand,
@@ -80,7 +85,24 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: image,
+            child: BlocSelector<WallpapersBloc, WallpapersState,
+                WallpaperModelBloc>(
+              selector: (state) => state.wallpapers
+                  .firstWhere((element) => element.id == wallpaperId),
+              builder: (context, wallpaper) {
+                final bytes = wallpaper.thumbOriginalImageBytesFromApi.bytes;
+                if (bytes == null) {
+                  context.read<WallpapersBloc>().add(
+                      WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
+                  return const SizedBox.shrink();
+                } else {
+                  return Image.memory(
+                    bytes,
+                    fit: BoxFit.cover,
+                  );
+                }
+              },
+            ),
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),
@@ -94,10 +116,11 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites =
-        context.select<WallpaperModelBloc, int>((w) => w.favorites);
-    final category =
-        context.select<WallpaperModelBloc, String>((w) => w.category);
+    final wallpaperId = context.read<String>();
+    final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+
+    final favorites = wallpaper.favorites;
+    final category = wallpaper.category;
 
     return Positioned(
       left: 8,
@@ -164,10 +187,11 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolution =
-        context.select<WallpaperModelBloc, String>((w) => w.resolution);
-    final fileSizeBytes =
-        context.select<WallpaperModelBloc, int>((w) => w.fileSizeBytes);
+    final wallpaperId = context.read<String>();
+    final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+
+    final resolution = wallpaper.resolution;
+    final fileSizeBytes = wallpaper.fileSizeBytes;
     final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
 
     return Row(

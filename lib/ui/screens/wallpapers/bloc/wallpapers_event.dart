@@ -35,4 +35,25 @@ class WallpaperDownloaded extends WallpapersEvent {
   const WallpaperDownloaded(this.wallpaper);
 
   final WallpaperModelBloc wallpaper;
+
+  @override
+  List<Object> get props => [wallpaper];
+}
+
+class WallpaperDetailThumbSmallGotBytes extends WallpapersEvent {
+  const WallpaperDetailThumbSmallGotBytes({required this.wallpaper});
+
+  final WallpaperModelBloc wallpaper;
+
+  @override
+  List<Object> get props => [wallpaper];
+}
+
+class WallpaperDetailThumbOriginGotBytes extends WallpapersEvent {
+  const WallpaperDetailThumbOriginGotBytes({required this.wallpaper});
+
+  final WallpaperModelBloc wallpaper;
+
+  @override
+  List<Object> get props => [wallpaper];
 }

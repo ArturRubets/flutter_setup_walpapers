@@ -23,7 +23,7 @@ void main() async {
 
   final pathToDatabase = join(await getDatabasesPath(), nameDatabaseFile);
 
-  // await deleteDatabase(pathToDatabase);
+  await deleteDatabase(pathToDatabase);
 
   // final table = sqlTableWallpapers;
 

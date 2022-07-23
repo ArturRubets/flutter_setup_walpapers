@@ -32,65 +32,74 @@ class WallpaperListMode extends StatelessWidget {
             flex: 203,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 9),
-                const Expanded(child: _WallpaperSpecificationInfo()),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: SizedBox(
-                    height: 42,
-                    child: BlocBuilder<WallpapersBloc, WallpapersState>(
-                      builder: (context, state) {
-                        final indexWallpaperInList = context.read<int>();
-                        final status = state
-                            .wallpapers[indexWallpaperInList].wallpaperStatus;
-                        switch (status) {
-                          case WallpaperStatus.initial:
-                            return ButtonSetWallpaper(
-                              content: const Center(
-                                child: Text('Download'),
-                              ),
-                              onTap: () async {
-                                final wallpaper =
-                                    context.read<WallpaperModelBloc>();
-                                context
-                                    .read<WallpapersBloc>()
-                                    .add(WallpaperDownloaded(wallpaper));
-                              },
-                            );
-                          case WallpaperStatus.loading:
-                            return ButtonSetWallpaper(
-                              content: const Center(
-                                child: Loader(color: AppColors.white),
-                              ),
-                              onTap: () async {},
-                            );
-                          case WallpaperStatus.downloaded:
-                            return ButtonSetWallpaper(
-                              content: const Center(
-                                child: Text('Set as wallpaper'),
-                              ),
-                              onTap: () async {
-                                // Set as wallpaper
-                              },
-                            );
-                          case WallpaperStatus.installedWallpaper:
-                            return ButtonSetWallpaper(
-                              content: const Center(
-                                child: Text('Installed as as wallpaper'),
-                              ),
-                              onTap: () async {},
-                            );
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 9),
+              children: const [
+                SizedBox(height: 9),
+                Expanded(child: _WallpaperSpecificationInfo()),
+                SizedBox(height: 16),
+                Expanded(child: _Button()),
+                SizedBox(height: 9),
               ],
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _Button extends StatelessWidget {
+  const _Button();
+
+  @override
+  Widget build(BuildContext context) {
+    final wallpaperId = context.read<String>();
+    return SizedBox(
+      height: 42,
+      child: BlocBuilder<WallpapersBloc, WallpapersState>(
+        builder: (context, _) {
+          final status = context
+              .read<WallpapersBloc>()
+              .findById(wallpaperId)
+              .wallpaperStatus;
+          switch (status) {
+            case WallpaperStatus.initial:
+              return ButtonSetWallpaper(
+                content: const Center(
+                  child: Text('Download'),
+                ),
+                onTap: () async {
+                  final wallpaper =
+                      context.read<WallpapersBloc>().findById(wallpaperId);
+                  context
+                      .read<WallpapersBloc>()
+                      .add(WallpaperDownloaded(wallpaper));
+                },
+              );
+            case WallpaperStatus.loading:
+              return ButtonSetWallpaper(
+                content: const Center(
+                  child: Loader(color: AppColors.white),
+                ),
+                onTap: () async {},
+              );
+            case WallpaperStatus.downloaded:
+              return ButtonSetWallpaper(
+                content: const Center(
+                  child: Text('Set as wallpaper'),
+                ),
+                onTap: () async {
+                  // Set as wallpaper
+                },
+              );
+            case WallpaperStatus.installedWallpaper:
+              return ButtonSetWallpaper(
+                content: const Center(
+                  child: Text('Installed as as wallpaper'),
+                ),
+                onTap: () async {},
+              );
+          }
+        },
       ),
     );
   }
@@ -101,22 +110,7 @@ class _WallpaperPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wallpaper = context.read<WallpaperModelBloc>();
-    final bytes = wallpaper.thumbs?.thumbSmall?.bytes;
-    final path = wallpaper.thumbs?.thumbSmall?.path;
-    Image? image;
-    if (bytes != null) {
-      image = Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-      );
-    } else if (path != null) {
-      image = Image.network(
-        path,
-        fit: BoxFit.cover,
-      );
-    }
-
+    final wallpaperId = context.read<String>();
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -124,7 +118,24 @@ class _WallpaperPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             color: AppColors.grey,
-            child: image,
+            child: BlocSelector<WallpapersBloc, WallpapersState,
+                WallpaperModelBloc>(
+              selector: (state) => state.wallpapers
+                  .firstWhere((element) => element.id == wallpaperId),
+              builder: (context, wallpaper) {
+                final bytes = wallpaper.thumbSmallImageBytesFromApi.bytes;
+                if (bytes == null) {
+                  context.read<WallpapersBloc>().add(
+                      WallpaperDetailThumbSmallGotBytes(wallpaper: wallpaper));
+                  return const SizedBox.shrink();
+                } else {
+                  return Image.memory(
+                    bytes,
+                    fit: BoxFit.cover,
+                  );
+                }
+              },
+            ),
           ),
         ),
         const _WallpaperPhotoGeneralInfo(),
@@ -134,7 +145,9 @@ class _WallpaperPhoto extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              final wallpaper = context.read<WallpaperModelBloc>();
+              final wallpaperId = context.read<String>();
+              final wallpaper =
+                  context.read<WallpapersBloc>().findById(wallpaperId);
               Navigator.of(context).pushNamed(
                 MainNavigationRouteNames.wallpaperScreenDetail,
                 arguments: wallpaper,
@@ -152,10 +165,10 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites =
-        context.select<WallpaperModelBloc, int>((w) => w.favorites);
-    final category =
-        context.select<WallpaperModelBloc, String>((w) => w.category);
+    final wallpaperId = context.read<String>();
+    final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+    final favorites = wallpaper.favorites;
+    final category = wallpaper.category;
 
     return Positioned(
       left: 3,
@@ -221,14 +234,14 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolution =
-        context.select<WallpaperModelBloc, String>((w) => w.resolution);
-    final fileSizeBytes =
-        context.select<WallpaperModelBloc, int>((w) => w.fileSizeBytes);
+    final wallpaperId = context.read<String>();
+    final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
+
+    final resolution = wallpaper.resolution;
+    final fileSizeBytes = wallpaper.fileSizeBytes;
     final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
 
-    final createdAt =
-        context.select<WallpaperModelBloc, String>((w) => w.createdAt);
+    final createdAt = wallpaper.createdAt;
     final createdAtFormat = convertDateTime(createdAt);
 
     return Wrap(

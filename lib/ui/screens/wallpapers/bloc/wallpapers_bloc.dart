@@ -51,6 +51,14 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       transformer: _throttleDroppable(_throttleDuration),
     );
     on<WallpaperDownloaded>(_onWallpaperDownloaded);
+    on<WallpaperDetailThumbSmallGotBytes>(
+      _onWallpaperDetailThumbSmallGotBytes,
+      transformer: concurrent(),
+    );
+    on<WallpaperDetailThumbOriginGotBytes>(
+      _onWallpaperDetailThumbOriginGotBytes,
+      transformer: concurrent(),
+    );
   }
 
   final WallpaperRepository _wallpaperRepository;
@@ -80,16 +88,13 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
         final response =
             await _wallpaperRepository.getWallpaperFromApi(state.currentPage);
 
-        final wallpapers = response.data.map(_createWallpaperFromApi).toList();
-
-        final updatedWallpapersFromStorage =
-            await _updateWallpapersFromStorage(wallpapers);
+        final wallpapers = await _getWallpaperFromApi(response);
 
         final hasReachedMaxValue = _hasReachedMax(response.meta);
 
         return emit(
           state.copyWith(
-            wallpapers: updatedWallpapersFromStorage,
+            wallpapers: wallpapers,
             hasReachedMax: hasReachedMaxValue,
             currentPage: response.meta.currentPage,
             status: WallpapersScreenStatus.success,
@@ -99,17 +104,14 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
 
       final response =
           await _wallpaperRepository.getWallpaperFromApi(state.currentPage + 1);
-      final wallpapers = response.data.map(_createWallpaperFromApi).toList();
 
-      final updatedWallpapersFromStorage =
-          await _updateWallpapersFromStorage(wallpapers);
+      final wallpapers = await _getWallpaperFromApi(response);
 
       final hasReachedMaxValue = _hasReachedMax(response.meta);
 
       emit(
         state.copyWith(
-          wallpapers: List.of(state.wallpapers)
-            ..addAll(updatedWallpapersFromStorage),
+          wallpapers: List.of(state.wallpapers)..addAll(wallpapers),
           hasReachedMax: hasReachedMaxValue,
           currentPage: response.meta.currentPage,
           status: WallpapersScreenStatus.success,
@@ -145,6 +147,8 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
           WallpapersState.limitWallpapersPerRequestToStorage,
         );
 
+        
+
         final wallpapers = response.map(_createWallpaperFromCache).toList();
         final hasReachedMaxValue = wallpapers.length <
                 WallpapersState.limitWallpapersPerRequestToStorage
@@ -164,8 +168,8 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
       final currentPage = state.currentPage + 1;
       final response =
           await _wallpaperRepository.getWallpapersFromStorage(currentPage);
-      final hasReachedMaxValue = response.isEmpty;
       final wallpapers = response.map(_createWallpaperFromCache).toList();
+      final hasReachedMaxValue = response.isEmpty;
 
       emit(
         state.copyWith(
@@ -226,8 +230,12 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     );
 
     if (!event.wallpaper.isFromCache) {
-      final isSave =
-          await _wallpaperRepository.saveWallpaperInStorage(event.wallpaper);
+      final isSave = await _wallpaperRepository.saveWallpaperInStorage(
+        event.wallpaper,
+        event.wallpaper.mainImageBytesFromApi.bytes,
+        event.wallpaper.thumbSmallImageBytesFromApi.bytes,
+        event.wallpaper.thumbOriginalImageBytesFromApi.bytes,
+      );
       if (isSave) {
         emit(
           state.copyWith(
@@ -250,7 +258,104 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
   }
 
+  FutureOr<void> _onWallpaperDetailThumbSmallGotBytes(
+    WallpaperDetailThumbSmallGotBytes event,
+    Emitter<WallpapersState> emit,
+  ) async {
+    final thumb = event.wallpaper.thumbs?.thumbSmall;
+    final bytes = thumb?.bytes;
+    final path = thumb?.path;
+
+    if (bytes != null) {
+      final wallpapers = _copyStateWallpapersUpdateThumbSmallWallpaperBytes(
+          event.wallpaper, bytes);
+
+      emit(state.copyWith(wallpapers: wallpapers));
+    } else if (path != null) {
+      final bytes = await _wallpaperRepository.imageFromNetworkInBytes(path);
+
+      if (bytes != null) {
+        final wallpapers = _copyStateWallpapersUpdateThumbSmallWallpaperBytes(
+            event.wallpaper, bytes);
+
+        emit(state.copyWith(wallpapers: wallpapers));
+      }
+    }
+  }
+
+  FutureOr<void> _onWallpaperDetailThumbOriginGotBytes(
+    WallpaperDetailThumbOriginGotBytes event,
+    Emitter<WallpapersState> emit,
+  ) async {
+    final thumb = event.wallpaper.thumbs?.thumbOrigin;
+    final bytes = thumb?.bytes;
+    final path = thumb?.path;
+
+    if (bytes != null) {
+      final wallpapers = _copyStateWallpapersUpdateThumbOriginWallpaperBytes(
+          event.wallpaper, bytes);
+
+      emit(state.copyWith(wallpapers: wallpapers));
+    } else if (path != null) {
+      final bytes = await _wallpaperRepository.imageFromNetworkInBytes(path);
+
+      if (bytes != null) {
+        final wallpapers = _copyStateWallpapersUpdateThumbOriginWallpaperBytes(
+            event.wallpaper, bytes);
+
+        emit(state.copyWith(wallpapers: wallpapers));
+      }
+    }
+  }
+
+  List<WallpaperModelBloc> _copyStateWallpapersUpdateThumbSmallWallpaperBytes(
+    WallpaperModelBloc wallpaper,
+    Uint8List bytes,
+  ) {
+    final copyList = List<WallpaperModelBloc>.from(state.wallpapers);
+
+    final cacheImageBytes =
+        wallpaper.thumbSmallImageBytesFromApi.copyWith(bytes: bytes);
+
+    final index = _getIndex(copyList, wallpaper.id);
+
+    copyList[index] =
+        copyList[index].copyWith(thumbSmallImageBytesFromApi: cacheImageBytes);
+    return copyList;
+  }
+
+  List<WallpaperModelBloc> _copyStateWallpapersUpdateThumbOriginWallpaperBytes(
+    WallpaperModelBloc wallpaper,
+    Uint8List bytes,
+  ) {
+    final copyList = List<WallpaperModelBloc>.from(state.wallpapers);
+
+    final cacheImageBytes =
+        wallpaper.thumbOriginalImageBytesFromApi.copyWith(bytes: bytes);
+
+    final index = _getIndex(copyList, wallpaper.id);
+
+    copyList[index] = copyList[index]
+        .copyWith(thumbOriginalImageBytesFromApi: cacheImageBytes);
+    return copyList;
+  }
+
+  WallpaperModelBloc findById(String id) {
+    return state.wallpapers.firstWhere((element) => element.id == id);
+  }
+
   bool _hasReachedMax(MetaDomain meta) => meta.lastPage == meta.currentPage;
+
+  Future<List<WallpaperModelBloc>> _getWallpaperFromApi(
+    WallpaperResponseDomain responseDomain,
+  ) async {
+    final wallpapers =
+        responseDomain.data.map(_createWallpaperFromApi).toList();
+
+    final updatedWallpapersFromStorage =
+        await _updateWallpapersFromStorage(wallpapers);
+    return updatedWallpapersFromStorage;
+  }
 
   WallpaperModelBloc _createWallpaperFromApi(WallpaperModelDomain wallpaper) {
     final w = wallpaper;
