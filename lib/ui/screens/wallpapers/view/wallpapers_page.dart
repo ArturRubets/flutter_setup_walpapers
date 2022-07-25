@@ -9,7 +9,7 @@ import '../bloc/wallpapers_bloc.dart';
 import '../widgets/widgets.dart';
 
 class WallpapersPage extends StatelessWidget {
-  const WallpapersPage({super.key});
+  const WallpapersPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class WallpapersPage extends StatelessWidget {
 }
 
 class WallpapersView extends StatefulWidget {
-  const WallpapersView({super.key});
+  const WallpapersView({Key? key}) : super(key: key);
 
   @override
   State<WallpapersView> createState() => _WallpapersViewState();
@@ -30,11 +30,6 @@ class WallpapersView extends StatefulWidget {
 
 class _WallpapersViewState extends State<WallpapersView> {
   final _scrollController = ScrollController();
-
-  bool get isTop {
-    final currentScroll = _scrollController.offset;
-    return currentScroll <= -80;
-  }
 
   bool get isBottom {
     final maxScroll = _scrollController.position.maxScrollExtent;
@@ -57,9 +52,29 @@ class _WallpapersViewState extends State<WallpapersView> {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const AppBarWidget(),
-            const SizedBox(height: 18),
+            const SizedBox(height: 9),
+            SizedBox(
+              height: 20,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  primary: AppColors.blueDark,
+                ),
+                onPressed: () => context
+                    .read<WallpapersBloc>()
+                    .add(const WallpapersFetchedRestart()),
+                child: const Text(
+                  'Update',
+                  style: TextStyle(fontSize: 10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 9),
             BlocBuilder<WallpapersBloc, WallpapersState>(
               builder: (context, state) {
                 final isGridMode =
@@ -86,7 +101,7 @@ class _WallpapersViewState extends State<WallpapersView> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: GridView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      physics: const ClampingScrollPhysics(),
                       controller: _scrollController,
                       itemCount: itemCount,
                       gridDelegate: gridDelegate,
@@ -114,15 +129,13 @@ class _WallpapersViewState extends State<WallpapersView> {
                     );
                   case WallpapersScreenStatus.failure:
                     return Expanded(
-                      child: Stack(
-                        children: [
-                          const Align(
+                      child: ListView(
+                        controller: _scrollController,
+                        physics: const BouncingScrollPhysics(),
+                        children: const [
+                          Align(
                             alignment: Alignment.topCenter,
                             child: Text('failed to fetch wallpapers'),
-                          ),
-                          ListView(
-                            controller: _scrollController,
-                            physics: const AlwaysScrollableScrollPhysics(),
                           ),
                         ],
                       ),
@@ -148,10 +161,6 @@ class _WallpapersViewState extends State<WallpapersView> {
 
   void _onScroll() {
     final wallpapersBloc = context.read<WallpapersBloc>();
-
-    if (isTop) {
-      wallpapersBloc.add(const WallpapersFetchedRestart());
-    }
 
     if (isBottom) {
       wallpapersBloc.add(const WallpapersFetched());

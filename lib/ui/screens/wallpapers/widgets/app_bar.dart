@@ -5,7 +5,8 @@ import '../../../../resources/resources.dart';
 import '../bloc/wallpapers_bloc.dart';
 
 class AppBarWidget extends StatelessWidget {
-  const AppBarWidget({super.key});
+  const AppBarWidget({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {

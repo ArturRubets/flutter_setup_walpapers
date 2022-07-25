@@ -9,7 +9,7 @@ import '../bloc/wallpapers_bloc.dart';
 import '../models/wallpaper_response.dart';
 
 class WallpaperListMode extends StatelessWidget {
-  const WallpaperListMode({super.key});
+  const WallpaperListMode({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,11 @@ class _Button extends StatelessWidget {
                   child: Text('Set as wallpaper'),
                 ),
                 onTap: () async {
-                  // Set as wallpaper
+                  final wallpaper =
+                      context.read<WallpapersBloc>().findById(wallpaperId);
+                  context
+                      .read<WallpapersBloc>()
+                      .add(WallpaperSetWallpaper(wallpaper: wallpaper));
                 },
               );
             case WallpaperStatus.installedWallpaper:
@@ -120,12 +124,12 @@ class _WallpaperPhoto extends StatelessWidget {
       },
     );
 
-    final bytes = wallpaper?.thumbOriginalImageBytesFromApi.bytes;
+    final bytes = wallpaper?.thumbs.thumbSmall.bytes;
     Image? image;
     if (wallpaper != null && bytes == null) {
       context
           .read<WallpapersBloc>()
-          .add(WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
+          .add(WallpaperThumbSmallGotBytes(wallpaper: wallpaper));
     } else if (bytes != null) {
       image = Image.memory(
         bytes,
@@ -151,11 +155,12 @@ class _WallpaperPhoto extends StatelessWidget {
           child: InkWell(
             onTap: () {
               final wallpaperId = context.read<String>();
-              final wallpaper =
-                  context.read<WallpapersBloc>().findById(wallpaperId);
               Navigator.of(context).pushNamed(
                 MainNavigationRouteNames.wallpaperScreenDetail,
-                arguments: wallpaper,
+                arguments: ArgumentsWallpaperDetail(
+                  bloc: context.read<WallpapersBloc>(),
+                  wallpaperId: wallpaperId,
+                ),
               );
             },
           ),

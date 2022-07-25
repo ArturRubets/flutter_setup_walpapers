@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:wallpaper/wallpaper.dart';
+
 import '../../../../data/api/wallhaven_api/configuration.dart';
 import '../../../../data/api/wallhaven_api/wallhaven_api_client.dart';
 import '../../../../data/local_storage/local_storage_wallpapers/local_storage_wallpapers.dart';
@@ -62,36 +64,20 @@ class WallpaperRepository {
   }
 
   Future<WallpaperLocalStorage> getWallpaperFromStorage(String id) async {
-    return await _localStorageWallpapers.getWallpaper(id);
+    return await _localStorageWallpapers.get(id);
   }
 
   Future<Uint8List?> imageFromNetworkInBytes(String path) async {
     return await _wallhavenApiClient.imageFromNetworkInBytes(path);
   }
 
-  Future<bool> saveWallpaperInStorage(
-    WallpaperModelDomain wallpaper, [
-    Uint8List? mainImageBytes,
-    Uint8List? thumbSmallImageBytes,
-    Uint8List? thumbOriginalImageBytes,
-  ]) async {
-    final pathMainImage = wallpaper.mainImage?.path;
-    final pathThumbSmall = wallpaper.thumbs?.thumbSmall?.path;
-    final pathThumbOrigin = wallpaper.thumbs?.thumbOrigin?.path;
-
-    if (pathMainImage != null &&
-        pathThumbSmall != null &&
-        pathThumbOrigin != null) {
-      final imageMain = mainImageBytes ??
-          await _wallhavenApiClient.imageFromNetworkInBytes(pathMainImage);
-
-      final thumbSmallImage = thumbSmallImageBytes ??
-          await _wallhavenApiClient.imageFromNetworkInBytes(pathThumbSmall);
-
-      final thumbOriginalImage = thumbOriginalImageBytes ??
-          await _wallhavenApiClient.imageFromNetworkInBytes(pathThumbOrigin);
-
-      return _localStorageWallpapers.saveWallpaper(
+  Future<WallpaperLocalStorage?> saveWallpaperInStorage(
+    WallpaperModelDomain wallpaper,
+    bool isSetWallpaper,
+  ) async {
+    try {
+      final imagesBytes = await _getImagesBytes(wallpaper);
+      return _localStorageWallpapers.save(
         WallpaperLocalStorage(
           id: wallpaper.id,
           favorites: wallpaper.favorites,
@@ -99,15 +85,69 @@ class WallpaperRepository {
           resolution: wallpaper.resolution,
           fileSizeBytes: wallpaper.fileSizeBytes,
           createdAt: wallpaper.createdAt,
-          imageBytes: imageMain!,
+          imageBytes: imagesBytes.imageMainBytes,
           thumbs: ThumbsLocalStorage(
-            smallImageBytes: thumbSmallImage!,
-            originalImageBytes: thumbOriginalImage!,
+            smallImageBytes: imagesBytes.thumbSmallBytes,
+            originalImageBytes: imagesBytes.thumbOriginalBytes,
           ),
-          isSetWallpaper: false,
+          isSetWallpaper: isSetWallpaper,
+          path: wallpaper.mainImage.path,
         ),
       );
+    } catch (e) {
+      return null;
     }
-    return false;
+  }
+
+  Future<bool> setWallpaper(
+    String path, [
+    int location = 1,
+  ]) async {
+    try {
+      // ignore: unused_local_variable
+      await for (final value in Wallpaper.imageDownloadProgress(path)) {}
+      await Wallpaper.homeScreen();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<ImagesBytes> _getImagesBytes(WallpaperModelDomain wallpaper) async {
+    final imageMain = wallpaper.mainImage.bytes ??
+        await _wallhavenApiClient
+            .imageFromNetworkInBytes(wallpaper.mainImage.path);
+
+    final thumbSmallImage = wallpaper.thumbs.thumbSmall.bytes ??
+        await _wallhavenApiClient
+            .imageFromNetworkInBytes(wallpaper.thumbs.thumbSmall.path);
+
+    final thumbOriginalImage = wallpaper.thumbs.thumbOrigin.bytes ??
+        await _wallhavenApiClient
+            .imageFromNetworkInBytes(wallpaper.thumbs.thumbOrigin.path);
+
+    if (imageMain == null ||
+        thumbSmallImage == null ||
+        thumbOriginalImage == null) throw BytesNotFoundFailure();
+
+    return ImagesBytes(
+      imageMainBytes: imageMain,
+      thumbSmallBytes: thumbSmallImage,
+      thumbOriginalBytes: thumbOriginalImage,
+    );
   }
 }
+
+class ImagesBytes {
+  ImagesBytes({
+    required this.imageMainBytes,
+    required this.thumbSmallBytes,
+    required this.thumbOriginalBytes,
+  });
+
+  final Uint8List imageMainBytes;
+  final Uint8List thumbSmallBytes;
+  final Uint8List thumbOriginalBytes;
+}
+
+class BytesNotFoundFailure implements Exception {}

@@ -39,8 +39,8 @@ class WallpaperModelDomain {
   final int fileSizeBytes;
   final String createdAt;
   final String id;
-  final ImageWallpaperDomain? mainImage;
-  final ThumbsDomain? thumbs;
+  final ImageWallpaperDomain mainImage;
+  final ThumbsDomain thumbs;
   final bool isFromCache;
 
   WallpaperModelDomain copyWith({
@@ -74,8 +74,8 @@ class ThumbsDomain {
     required this.thumbOrigin,
   });
 
-  final ImageWallpaperDomain? thumbSmall;
-  final ImageWallpaperDomain? thumbOrigin;
+  final ImageWallpaperDomain thumbSmall;
+  final ImageWallpaperDomain thumbOrigin;
 
   ThumbsDomain copyWith({
     ImageWallpaperDomain? thumbSmall,
@@ -114,7 +114,7 @@ class ImageWallpaperDomain {
     this.bytes,
   });
 
-  final String? path;
+  final String path;
   final Uint8List? bytes;
 
   ImageWallpaperDomain copyWith({

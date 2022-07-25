@@ -14,6 +14,7 @@ class WallpaperLocalStorage {
     required this.thumbs,
     required this.id,
     required this.isSetWallpaper,
+    required this.path,
   });
 
   factory WallpaperLocalStorage.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +29,7 @@ class WallpaperLocalStorage {
   final String id;
   final List<int> imageBytes;
   final bool isSetWallpaper;
+  final String path;
 
   Map<String, dynamic> toJson() => _$WallpaperLocalStorageToJson(this);
 }
@@ -35,15 +37,15 @@ class WallpaperLocalStorage {
 @JsonSerializable()
 class ThumbsLocalStorage {
   const ThumbsLocalStorage({
-    required this.originalImageBytes,
     required this.smallImageBytes,
+    required this.originalImageBytes,
   });
 
   factory ThumbsLocalStorage.fromJson(Map<String, dynamic> json) =>
       _$ThumbsLocalStorageFromJson(json);
 
-  final List<int> originalImageBytes;
   final List<int> smallImageBytes;
+  final List<int> originalImageBytes;
 
   Map<String, dynamic> toJson() => _$ThumbsLocalStorageToJson(this);
 }

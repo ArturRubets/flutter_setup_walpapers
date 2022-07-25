@@ -8,7 +8,7 @@ import '../bloc/wallpapers_bloc.dart';
 import '../models/wallpaper_response.dart';
 
 class WallpaperGridMode extends StatelessWidget {
-  const WallpaperGridMode({super.key});
+  const WallpaperGridMode({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +40,12 @@ class WallpaperGridMode extends StatelessWidget {
           child: InkWell(
             onTap: () {
               final wallpaperId = context.read<String>();
-              final wallpaper =
-                  context.read<WallpapersBloc>().findById(wallpaperId);
               Navigator.of(context).pushNamed(
                 MainNavigationRouteNames.wallpaperScreenDetail,
-                arguments: wallpaper,
+                arguments: ArgumentsWallpaperDetail(
+                  bloc: context.read<WallpapersBloc>(),
+                  wallpaperId: wallpaperId,
+                ),
               );
             },
           ),
@@ -69,12 +70,12 @@ class _WallpaperPhoto extends StatelessWidget {
       },
     );
 
-    final bytes = wallpaper?.thumbOriginalImageBytesFromApi.bytes;
+    final bytes = wallpaper?.thumbs.thumbOrigin.bytes;
     Image? image;
     if (wallpaper != null && bytes == null) {
       context
           .read<WallpapersBloc>()
-          .add(WallpaperDetailThumbOriginGotBytes(wallpaper: wallpaper));
+          .add(WallpaperThumbOriginGotBytes(wallpaper: wallpaper));
     } else if (bytes != null) {
       image = Image.memory(
         bytes,

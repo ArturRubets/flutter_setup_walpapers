@@ -6,9 +6,9 @@ import 'widgets/app_view.dart';
 
 class App extends StatelessWidget {
   const App({
-    super.key,
+    Key? key,
     required this.wallpaperRepository,
-  });
+  }) : super(key: key);
 
   final WallpaperRepository wallpaperRepository;
 

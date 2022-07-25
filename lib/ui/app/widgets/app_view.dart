@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../navigation/main_navigation.dart';
 
 class AppView extends StatelessWidget {
-  const AppView({super.key});
+  const AppView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

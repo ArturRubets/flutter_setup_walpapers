@@ -40,8 +40,8 @@ class WallpaperDownloaded extends WallpapersEvent {
   List<Object> get props => [wallpaper];
 }
 
-class WallpaperDetailThumbSmallGotBytes extends WallpapersEvent {
-  const WallpaperDetailThumbSmallGotBytes({required this.wallpaper});
+class WallpaperThumbSmallGotBytes extends WallpapersEvent {
+  const WallpaperThumbSmallGotBytes({required this.wallpaper});
 
   final WallpaperModelBloc wallpaper;
 
@@ -49,8 +49,26 @@ class WallpaperDetailThumbSmallGotBytes extends WallpapersEvent {
   List<Object> get props => [wallpaper];
 }
 
-class WallpaperDetailThumbOriginGotBytes extends WallpapersEvent {
-  const WallpaperDetailThumbOriginGotBytes({required this.wallpaper});
+class WallpaperThumbOriginGotBytes extends WallpapersEvent {
+  const WallpaperThumbOriginGotBytes({required this.wallpaper});
+
+  final WallpaperModelBloc wallpaper;
+
+  @override
+  List<Object> get props => [wallpaper];
+}
+
+class WallpaperMainImageGotBytes extends WallpapersEvent {
+  const WallpaperMainImageGotBytes({required this.wallpaper});
+
+  final WallpaperModelBloc wallpaper;
+
+  @override
+  List<Object> get props => [wallpaper];
+}
+
+class WallpaperSetWallpaper extends WallpapersEvent {
+  const WallpaperSetWallpaper({required this.wallpaper});
 
   final WallpaperModelBloc wallpaper;
 

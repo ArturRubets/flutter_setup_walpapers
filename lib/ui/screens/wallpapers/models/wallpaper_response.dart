@@ -1,30 +1,32 @@
-import 'dart:typed_data';
-
 import '../../../../domain/repositories/wallpaper_repository/src/models/wallpaper_response.dart';
 
 enum WallpaperStatus { initial, loading, downloaded, installedWallpaper }
 
 class WallpaperModelBloc extends WallpaperModelDomain {
   const WallpaperModelBloc({
-    required super.favorites,
-    required super.category,
-    required super.resolution,
-    required super.fileSizeBytes,
-    required super.createdAt,
-    required super.id,
-    required super.mainImage,
-    required super.thumbs,
-    required super.isFromCache,
+    required int favorites,
+    required String category,
+    required String resolution,
+    required int fileSizeBytes,
+    required String createdAt,
+    required String id,
+    required ImageWallpaperDomain mainImage,
+    required ThumbsDomain thumbs,
+    required bool isFromCache,
     required this.wallpaperStatus,
-    this.mainImageBytesFromApi = const CacheImageBytes(),
-    this.thumbSmallImageBytesFromApi = const CacheImageBytes(),
-    this.thumbOriginalImageBytesFromApi = const CacheImageBytes(),
-  });
+  }) : super(
+          favorites: favorites,
+          category: category,
+          resolution: resolution,
+          fileSizeBytes: fileSizeBytes,
+          createdAt: createdAt,
+          id: id,
+          mainImage: mainImage,
+          thumbs: thumbs,
+          isFromCache: isFromCache,
+        );
 
   final WallpaperStatus wallpaperStatus;
-  final CacheImageBytes mainImageBytesFromApi;
-  final CacheImageBytes thumbSmallImageBytesFromApi;
-  final CacheImageBytes thumbOriginalImageBytesFromApi;
 
   @override
   WallpaperModelBloc copyWith({
@@ -38,9 +40,6 @@ class WallpaperModelBloc extends WallpaperModelDomain {
     ThumbsDomain? thumbs,
     bool? isFromCache,
     WallpaperStatus? wallpaperStatus,
-    CacheImageBytes? mainImageBytesFromApi,
-    CacheImageBytes? thumbSmallImageBytesFromApi,
-    CacheImageBytes? thumbOriginalImageBytesFromApi,
   }) {
     return WallpaperModelBloc(
       favorites: favorites ?? this.favorites,
@@ -53,26 +52,6 @@ class WallpaperModelBloc extends WallpaperModelDomain {
       thumbs: thumbs ?? this.thumbs,
       isFromCache: isFromCache ?? this.isFromCache,
       wallpaperStatus: wallpaperStatus ?? this.wallpaperStatus,
-      mainImageBytesFromApi:
-          mainImageBytesFromApi ?? this.mainImageBytesFromApi,
-      thumbSmallImageBytesFromApi:
-          thumbSmallImageBytesFromApi ?? this.thumbSmallImageBytesFromApi,
-      thumbOriginalImageBytesFromApi:
-          thumbOriginalImageBytesFromApi ?? this.thumbOriginalImageBytesFromApi,
-    );
-  }
-}
-
-class CacheImageBytes {
-  const CacheImageBytes({this.bytes});
-
-  final Uint8List? bytes;
-
-  CacheImageBytes copyWith({
-    Uint8List? bytes,
-  }) {
-    return CacheImageBytes(
-      bytes: bytes ?? this.bytes,
     );
   }
 }

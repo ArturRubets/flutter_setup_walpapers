@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'data/api/wallhaven_api/wallhaven_api_client.dart';
@@ -27,8 +28,10 @@ void main() async {
     },
   );
 
+  final prefs = await SharedPreferences.getInstance();
+
   final wallhavenApiClient = WallhavenApiClient();
-  final wallpapersLocalStorage = LocalStorageWallpapers(database);
+  final wallpapersLocalStorage = LocalStorageWallpapers(database, prefs);
   final wallpaperRepository =
       WallpaperRepository(wallhavenApiClient, wallpapersLocalStorage);
 

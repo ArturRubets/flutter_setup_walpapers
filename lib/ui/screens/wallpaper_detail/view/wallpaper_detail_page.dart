@@ -4,23 +4,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../resources/resources.dart';
 import '../../../../utils/utils.dart';
 import '../../../common_widgets/common_widgets.dart';
+import '../../wallpapers/bloc/wallpapers_bloc.dart';
 import '../../wallpapers/models/wallpaper_response.dart';
-import '../bloc/wallpaper_detail_bloc.dart';
 
 class WallpaperDetailPage extends StatelessWidget {
-  const WallpaperDetailPage({super.key});
+  const WallpaperDetailPage({
+    Key? key,
+    required this.wallpaperId,
+  }) : super(key: key);
+
+  final String wallpaperId;
 
   @override
   Widget build(BuildContext context) {
     final paddingFromSystemBar = MediaQuery.of(context).padding.top;
 
-    final wallpaper = context.watch<WallpaperDetailBloc>().state.wallpaper;
-    final bytes = wallpaper.mainImageBytesFromApi.bytes;
+    final wallpaper = context.watch<WallpapersBloc>().findById(wallpaperId);
+    final bytes = wallpaper.mainImage.bytes;
     Image? image;
     if (bytes == null) {
       context
-          .read<WallpaperDetailBloc>()
-          .add(const WallpaperDetailGotImageInBytes());
+          .read<WallpapersBloc>()
+          .add(WallpaperMainImageGotBytes(wallpaper: wallpaper));
     } else {
       image = Image.memory(
         bytes,
@@ -36,8 +41,8 @@ class WallpaperDetailPage extends StatelessWidget {
             color: AppColors.grey,
             child: image,
           ),
-          const _WallpaperSpecificationInfo(),
-          const _ButtonDownloadAndSetWallpaper(),
+          _WallpaperSpecificationInfo(wallpaperId),
+          _ButtonDownloadAndSetWallpaper(wallpaperId),
           _ButtonArrowBack(paddingFromSystemBar: paddingFromSystemBar),
         ],
       ),
@@ -46,7 +51,9 @@ class WallpaperDetailPage extends StatelessWidget {
 }
 
 class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
-  const _ButtonDownloadAndSetWallpaper();
+  const _ButtonDownloadAndSetWallpaper(this.wallpaperId);
+
+  final String wallpaperId;
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +63,11 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
       right: 48,
       child: SizedBox(
         height: 63,
-        child: BlocBuilder<WallpaperDetailBloc, WallpaperDetailState>(
+        child: BlocBuilder<WallpapersBloc, WallpapersState>(
           builder: (context, state) {
-            final status = state.wallpaper.wallpaperStatus;
+            final wallpaper =
+                context.read<WallpapersBloc>().findById(wallpaperId);
+            final status = wallpaper.wallpaperStatus;
             switch (status) {
               case WallpaperStatus.initial:
                 return ButtonSetWallpaper(
@@ -67,8 +76,8 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                   ),
                   onTap: () async {
                     context
-                        .read<WallpaperDetailBloc>()
-                        .add(const WallpaperDetailDownloaded());
+                        .read<WallpapersBloc>()
+                        .add(WallpaperDownloaded(wallpaper));
                   },
                 );
               case WallpaperStatus.loading:
@@ -84,7 +93,9 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                     child: Text('Set as wallpaper'),
                   ),
                   onTap: () async {
-                    // Set as wallpaper
+                    context
+                        .read<WallpapersBloc>()
+                        .add(WallpaperSetWallpaper(wallpaper: wallpaper));
                   },
                 );
               case WallpaperStatus.installedWallpaper:
@@ -103,19 +114,20 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
 }
 
 class _WallpaperSpecificationInfo extends StatelessWidget {
-  const _WallpaperSpecificationInfo();
+  const _WallpaperSpecificationInfo(this.wallpaperId);
+
+  final String wallpaperId;
 
   @override
   Widget build(BuildContext context) {
-    final resolution =
-        context.read<WallpaperDetailBloc>().state.wallpaper.resolution;
+    final wallpaper = context.read<WallpapersBloc>().findById(wallpaperId);
 
-    final fileSizeBytes =
-        context.read<WallpaperDetailBloc>().state.wallpaper.fileSizeBytes;
+    final resolution = wallpaper.resolution;
+
+    final fileSizeBytes = wallpaper.fileSizeBytes;
     final filesizeConverting = filesizeConvert(fileSizeBytes, 1);
 
-    final createdAt =
-        context.read<WallpaperDetailBloc>().state.wallpaper.createdAt;
+    final createdAt = wallpaper.createdAt;
     final createdAtFormat = convertDateTime(createdAt);
 
     return Positioned(

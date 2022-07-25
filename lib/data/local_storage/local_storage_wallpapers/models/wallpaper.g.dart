@@ -20,6 +20,7 @@ WallpaperLocalStorage _$WallpaperLocalStorageFromJson(
           ThumbsLocalStorage.fromJson(json['thumbs'] as Map<String, dynamic>),
       id: json['id'] as String,
       isSetWallpaper: json['isSetWallpaper'] as bool,
+      path: json['path'] as String,
     );
 
 Map<String, dynamic> _$WallpaperLocalStorageToJson(
@@ -34,6 +35,7 @@ Map<String, dynamic> _$WallpaperLocalStorageToJson(
       'id': instance.id,
       'imageBytes': instance.imageBytes,
       'isSetWallpaper': instance.isSetWallpaper,
+      'path': instance.path,
     };
 
 ThumbsLocalStorage _$ThumbsLocalStorageFromJson(Map<String, dynamic> json) =>
