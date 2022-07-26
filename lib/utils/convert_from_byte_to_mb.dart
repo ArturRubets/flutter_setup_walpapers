@@ -1,5 +1,5 @@
 String filesizeConvert(int size, [int round = 2]) {
-  var divider = 1024;
+  const divider = 1024;
 
   if (size < divider) {
     return '$size B';
@@ -31,21 +31,21 @@ String filesizeConvert(int size, [int round = 2]) {
 
   if (size < divider * divider * divider * divider * divider &&
       size % divider == 0) {
-    num r = size / divider / divider / divider / divider;
+    final r = size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} TB';
   }
 
   if (size < divider * divider * divider * divider * divider) {
-    num r = size / divider / divider / divider / divider;
+    final r = size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} TB';
   }
 
   if (size < divider * divider * divider * divider * divider * divider &&
       size % divider == 0) {
-    num r = size / divider / divider / divider / divider / divider;
+    final r = size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} PB';
   } else {
-    num r = size / divider / divider / divider / divider / divider;
+    final r = size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} PB';
   }
 }

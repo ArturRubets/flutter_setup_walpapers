@@ -4,11 +4,11 @@ import '../../resources/app_colors.dart';
 
 class Loader extends StatelessWidget {
   const Loader({
-    Key? key,
+    super.key,
     this.height = 24,
     this.width = 24,
     this.color = AppColors.loaderBlue,
-  }) : super(key: key);
+  });
 
   final double height;
   final double width;

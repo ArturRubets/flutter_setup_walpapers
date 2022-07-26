@@ -5,8 +5,7 @@ import '../../../../resources/resources.dart';
 import '../bloc/wallpapers_bloc.dart';
 
 class AppBarWidget extends StatelessWidget {
-  const AppBarWidget({Key? key}) : super(key: key);
-
+  const AppBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +16,6 @@ class AppBarWidget extends StatelessWidget {
         right: 24,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
           Expanded(
@@ -41,7 +39,6 @@ class _Title extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: const [
         Text(
           'Wallpapers',
@@ -62,7 +59,8 @@ class _ButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayMode = context.select<WallpapersBloc, WallpaperDisplayMode>(
-        (w) => w.state.displayMode);
+      (w) => w.state.displayMode,
+    );
     final isGridMode = displayMode == WallpaperDisplayMode.grid;
     final isListMode = displayMode == WallpaperDisplayMode.list;
 

@@ -9,7 +9,7 @@ import '../bloc/wallpapers_bloc.dart';
 import '../models/wallpaper_response.dart';
 
 class WallpaperListMode extends StatelessWidget {
-  const WallpaperListMode({Key? key}) : super(key: key);
+  const WallpaperListMode({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,9 @@ class _WallpaperPhoto extends StatelessWidget {
     final wallpaperId = context.read<String>();
     final wallpaper = context.select<WallpapersBloc, WallpaperModelBloc?>(
       (value) {
-        if (value.state.wallpapers.isEmpty) return null;
+        if (value.state.wallpapers.isEmpty) {
+          return null;
+        }
 
         return value.state.wallpapers
             .firstWhere((element) => element.id == wallpaperId);
@@ -142,7 +144,7 @@ class _WallpaperPhoto extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(15),
-          child: Container(
+          child: ColoredBox(
             color: AppColors.grey,
             child: image,
           ),
@@ -185,7 +187,6 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
       right: 3,
       bottom: 8,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Flexible(
             flex: 4,

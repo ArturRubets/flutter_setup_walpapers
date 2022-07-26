@@ -10,38 +10,36 @@ abstract class MainNavigationRouteNames {
   static const wallpaperScreenDetail = '/wallpaper_screen_detail';
 }
 
-abstract class MainNavigation {
-  static Route<Object> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case MainNavigationRouteNames.wallpapersScreen:
+Route<Object> onGenerateRoute(RouteSettings settings) {
+  switch (settings.name) {
+    case MainNavigationRouteNames.wallpapersScreen:
+      return MaterialPageRoute(
+        builder: (_) => const WallpapersPage(),
+      );
+    case MainNavigationRouteNames.wallpaperScreenDetail:
+      final arguments = settings.arguments;
+      final argumentsWallpaperDetail =
+          arguments is ArgumentsWallpaperDetail ? arguments : null;
+
+      final bloc = argumentsWallpaperDetail?.bloc;
+      final wallpaperId = argumentsWallpaperDetail?.wallpaperId;
+
+      if (bloc == null || wallpaperId == null) {
         return MaterialPageRoute(
           builder: (_) => const WallpapersPage(),
         );
-      case MainNavigationRouteNames.wallpaperScreenDetail:
-        final arguments = settings.arguments;
-        final argumentsWallpaperDetail =
-            arguments is ArgumentsWallpaperDetail ? arguments : null;
+      }
 
-        final bloc = argumentsWallpaperDetail?.bloc;
-        final wallpaperId = argumentsWallpaperDetail?.wallpaperId;
-
-        if (bloc == null || wallpaperId == null) {
-          return MaterialPageRoute(
-            builder: (_) => const WallpapersPage(),
-          );
-        }
-
-        return MaterialPageRoute(
-          builder: (_) => BlocProvider.value(
-            value: bloc,
-            child: WallpaperDetailPage(wallpaperId: wallpaperId),
-          ),
-        );
-      default:
-        return MaterialPageRoute(
-          builder: (_) => const Text('Navigation error'),
-        );
-    }
+      return MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: bloc,
+          child: WallpaperDetailPage(wallpaperId: wallpaperId),
+        ),
+      );
+    default:
+      return MaterialPageRoute(
+        builder: (_) => const Text('Navigation error'),
+      );
   }
 }
 

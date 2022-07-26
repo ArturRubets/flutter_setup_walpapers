@@ -34,7 +34,6 @@ class WallpaperRepository {
         id: w.id,
         mainImage: ImageWallpaperDomain(
           path: w.path,
-          bytes: null,
         ),
         thumbs: ThumbsDomain(
           thumbOrigin: ImageWallpaperDomain(path: w.thumbs.original),
@@ -59,22 +58,19 @@ class WallpaperRepository {
   Future<List<WallpaperLocalStorage>> getWallpapersFromStorage(
     int page, [
     int limit = 24,
-  ]) async {
-    return await _localStorageWallpapers.getWallpapers(page, limit);
-  }
+  ]) =>
+      _localStorageWallpapers.getWallpapers(page, limit);
 
-  Future<WallpaperLocalStorage> getWallpaperFromStorage(String id) async {
-    return await _localStorageWallpapers.get(id);
-  }
+  Future<WallpaperLocalStorage> getWallpaperFromStorage(String id) =>
+      _localStorageWallpapers.get(id);
 
-  Future<Uint8List?> imageFromNetworkInBytes(String path) async {
-    return await _wallhavenApiClient.imageFromNetworkInBytes(path);
-  }
+  Future<Uint8List?> imageFromNetworkInBytes(String path) =>
+      _wallhavenApiClient.imageFromNetworkInBytes(path);
 
-  Future<WallpaperLocalStorage?> saveWallpaperInStorage(
-    WallpaperModelDomain wallpaper,
-    bool isSetWallpaper,
-  ) async {
+  Future<WallpaperLocalStorage?> saveWallpaperInStorage({
+    required WallpaperModelDomain wallpaper,
+    required bool isSetWallpaper,
+  }) async {
     try {
       final imagesBytes = await _getImagesBytes(wallpaper);
       return _localStorageWallpapers.save(
@@ -94,7 +90,7 @@ class WallpaperRepository {
           path: wallpaper.mainImage.path,
         ),
       );
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -108,7 +104,7 @@ class WallpaperRepository {
       await for (final value in Wallpaper.imageDownloadProgress(path)) {}
       await Wallpaper.homeScreen();
       return true;
-    } catch (e) {
+    } on Exception {
       return false;
     }
   }
@@ -128,7 +124,9 @@ class WallpaperRepository {
 
     if (imageMain == null ||
         thumbSmallImage == null ||
-        thumbOriginalImage == null) throw BytesNotFoundFailure();
+        thumbOriginalImage == null) {
+      throw BytesNotFoundFailure();
+    }
 
     return ImagesBytes(
       imageMainBytes: imageMain,

@@ -4,10 +4,10 @@ import '../../resources/resources.dart';
 
 class ButtonSetWallpaper extends StatelessWidget {
   const ButtonSetWallpaper({
-    Key? key,
     required this.content,
     required this.onTap,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget content;
   final Future<void> Function() onTap;

@@ -46,7 +46,7 @@ class WallhavenApiClient {
     try {
       final response = await http.get(Uri.parse(path));
       return response.bodyBytes;
-    } catch (_) {}
+    } on Exception catch (_) {}
     return null;
   }
 }

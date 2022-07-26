@@ -12,12 +12,11 @@ class WallpaperResponseDomain {
   WallpaperResponseDomain copyWith({
     List<WallpaperModelDomain>? data,
     MetaDomain? meta,
-  }) {
-    return WallpaperResponseDomain(
-      data: data ?? this.data,
-      meta: meta ?? this.meta,
-    );
-  }
+  }) =>
+      WallpaperResponseDomain(
+        data: data ?? this.data,
+        meta: meta ?? this.meta,
+      );
 }
 
 class WallpaperModelDomain {
@@ -53,19 +52,18 @@ class WallpaperModelDomain {
     ImageWallpaperDomain? mainImage,
     ThumbsDomain? thumbs,
     bool? isFromCache,
-  }) {
-    return WallpaperModelDomain(
-      favorites: favorites ?? this.favorites,
-      category: category ?? this.category,
-      resolution: resolution ?? this.resolution,
-      fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
-      createdAt: createdAt ?? this.createdAt,
-      id: id ?? this.id,
-      mainImage: mainImage ?? this.mainImage,
-      thumbs: thumbs ?? this.thumbs,
-      isFromCache: isFromCache ?? this.isFromCache,
-    );
-  }
+  }) =>
+      WallpaperModelDomain(
+        favorites: favorites ?? this.favorites,
+        category: category ?? this.category,
+        resolution: resolution ?? this.resolution,
+        fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
+        createdAt: createdAt ?? this.createdAt,
+        id: id ?? this.id,
+        mainImage: mainImage ?? this.mainImage,
+        thumbs: thumbs ?? this.thumbs,
+        isFromCache: isFromCache ?? this.isFromCache,
+      );
 }
 
 class ThumbsDomain {
@@ -80,12 +78,11 @@ class ThumbsDomain {
   ThumbsDomain copyWith({
     ImageWallpaperDomain? thumbSmall,
     ImageWallpaperDomain? thumbOrigin,
-  }) {
-    return ThumbsDomain(
-      thumbSmall: thumbSmall ?? this.thumbSmall,
-      thumbOrigin: thumbOrigin ?? this.thumbOrigin,
-    );
-  }
+  }) =>
+      ThumbsDomain(
+        thumbSmall: thumbSmall ?? this.thumbSmall,
+        thumbOrigin: thumbOrigin ?? this.thumbOrigin,
+      );
 }
 
 class MetaDomain {
@@ -100,12 +97,11 @@ class MetaDomain {
   MetaDomain copyWith({
     int? currentPage,
     int? lastPage,
-  }) {
-    return MetaDomain(
-      currentPage: currentPage ?? this.currentPage,
-      lastPage: lastPage ?? this.lastPage,
-    );
-  }
+  }) =>
+      MetaDomain(
+        currentPage: currentPage ?? this.currentPage,
+        lastPage: lastPage ?? this.lastPage,
+      );
 }
 
 class ImageWallpaperDomain {
@@ -120,10 +116,9 @@ class ImageWallpaperDomain {
   ImageWallpaperDomain copyWith({
     String? path,
     Uint8List? bytes,
-  }) {
-    return ImageWallpaperDomain(
-      path: path ?? this.path,
-      bytes: bytes ?? this.bytes,
-    );
-  }
+  }) =>
+      ImageWallpaperDomain(
+        path: path ?? this.path,
+        bytes: bytes ?? this.bytes,
+      );
 }

@@ -4,27 +4,17 @@ enum WallpaperStatus { initial, loading, downloaded, installedWallpaper }
 
 class WallpaperModelBloc extends WallpaperModelDomain {
   const WallpaperModelBloc({
-    required int favorites,
-    required String category,
-    required String resolution,
-    required int fileSizeBytes,
-    required String createdAt,
-    required String id,
-    required ImageWallpaperDomain mainImage,
-    required ThumbsDomain thumbs,
-    required bool isFromCache,
+    required super.favorites,
+    required super.category,
+    required super.resolution,
+    required super.fileSizeBytes,
+    required super.createdAt,
+    required super.id,
+    required super.mainImage,
+    required super.thumbs,
+    required super.isFromCache,
     required this.wallpaperStatus,
-  }) : super(
-          favorites: favorites,
-          category: category,
-          resolution: resolution,
-          fileSizeBytes: fileSizeBytes,
-          createdAt: createdAt,
-          id: id,
-          mainImage: mainImage,
-          thumbs: thumbs,
-          isFromCache: isFromCache,
-        );
+  });
 
   final WallpaperStatus wallpaperStatus;
 

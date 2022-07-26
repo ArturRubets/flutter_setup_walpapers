@@ -4,20 +4,19 @@ part 'wallpaper_response.g.dart';
 
 @JsonSerializable()
 class WallpaperResponseApi {
-  factory WallpaperResponseApi.fromJson(Map<String, dynamic> json) =>
-      _$WallpaperResponseApiFromJson(json);
-
   const WallpaperResponseApi({
     required this.data,
     required this.meta,
   });
+  factory WallpaperResponseApi.fromJson(Map<String, dynamic> json) =>
+      _$WallpaperResponseApiFromJson(json);
   final List<WallpaperApi> data;
   final MetaApi meta;
   Map<String, dynamic> toJson() => _$WallpaperResponseApiToJson(this);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class WallpaperApi  {
+class WallpaperApi {
   const WallpaperApi({
     required this.id,
     required this.url,

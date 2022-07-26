@@ -8,7 +8,7 @@ String? convertDateTime(String date) {
     final year = '${dateTime.year}'.padLeft(2, '0');
 
     return '$hour:$minute ($year-$month-$day)';
-  } catch (e) {
+  } on Exception {
     return null;
   }
 }

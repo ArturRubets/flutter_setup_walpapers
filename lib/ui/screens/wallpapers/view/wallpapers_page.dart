@@ -9,7 +9,7 @@ import '../bloc/wallpapers_bloc.dart';
 import '../widgets/widgets.dart';
 
 class WallpapersPage extends StatelessWidget {
-  const WallpapersPage({Key? key}) : super(key: key);
+  const WallpapersPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class WallpapersPage extends StatelessWidget {
 }
 
 class WallpapersView extends StatefulWidget {
-  const WallpapersView({Key? key}) : super(key: key);
+  const WallpapersView({super.key});
 
   @override
   State<WallpapersView> createState() => _WallpapersViewState();

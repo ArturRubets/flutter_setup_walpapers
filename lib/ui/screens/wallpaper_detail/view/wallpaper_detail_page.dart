@@ -9,9 +9,9 @@ import '../../wallpapers/models/wallpaper_response.dart';
 
 class WallpaperDetailPage extends StatelessWidget {
   const WallpaperDetailPage({
-    Key? key,
     required this.wallpaperId,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String wallpaperId;
 
@@ -37,7 +37,7 @@ class WallpaperDetailPage extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Container(
+          ColoredBox(
             color: AppColors.grey,
             child: image,
           ),
