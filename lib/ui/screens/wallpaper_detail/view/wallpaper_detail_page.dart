@@ -81,11 +81,10 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                   },
                 );
               case WallpaperStatus.loading:
-                return ButtonSetWallpaper(
-                  content: const Center(
+                return const ButtonSetWallpaper(
+                  content: Center(
                     child: Loader(color: AppColors.white),
                   ),
-                  onTap: () async {},
                 );
               case WallpaperStatus.downloaded:
                 return ButtonSetWallpaper(
@@ -99,11 +98,10 @@ class _ButtonDownloadAndSetWallpaper extends StatelessWidget {
                   },
                 );
               case WallpaperStatus.installedWallpaper:
-                return ButtonSetWallpaper(
-                  content: const Center(
+                return const ButtonSetWallpaper(
+                  content: Center(
                     child: Text('Installed as as wallpaper'),
                   ),
-                  onTap: () async {},
                 );
             }
           },
@@ -149,18 +147,38 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
             runSpacing: 10,
             spacing: 10,
             children: [
-              item(AppImages.expand, resolution),
-              item(AppImages.downloading, filesizeConverting),
+              _RowImageWithText(
+                imageAsset: AppImages.expand,
+                description: resolution,
+              ),
+              _RowImageWithText(
+                imageAsset: AppImages.downloading,
+                description: filesizeConverting,
+              ),
               if (createdAtFormat != null)
-                item(AppImages.date, createdAtFormat),
+                _RowImageWithText(
+                  imageAsset: AppImages.date,
+                  description: createdAtFormat,
+                ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget item(String imageAsset, String description) {
+class _RowImageWithText extends StatelessWidget {
+  const _RowImageWithText({
+    required this.imageAsset,
+    required this.description,
+  });
+
+  final String imageAsset;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -193,7 +211,7 @@ class _ButtonArrowBack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 10 + paddingFromSystemBar,
+      top: paddingFromSystemBar + 10,
       left: 10,
       child: Material(
         borderRadius: BorderRadius.circular(25),

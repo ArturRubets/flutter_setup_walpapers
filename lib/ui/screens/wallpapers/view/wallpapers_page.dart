@@ -34,6 +34,7 @@ class _WallpapersViewState extends State<WallpapersView> {
   bool get isBottom {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
+
     return currentScroll >= (maxScroll * 0.9);
   }
 
@@ -54,7 +55,7 @@ class _WallpapersViewState extends State<WallpapersView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const AppBarWidget(),
+            const AppBar(),
             const SizedBox(height: 9),
             SizedBox(
               height: 20,
@@ -109,6 +110,7 @@ class _WallpapersViewState extends State<WallpapersView> {
                         if (index >= state.wallpapers.length) {
                           return const Loader();
                         }
+
                         return Provider(
                           create: (_) => state.wallpapers[index].id,
                           child: isGridMode

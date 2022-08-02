@@ -5,12 +5,12 @@ import '../../resources/resources.dart';
 class ButtonSetWallpaper extends StatelessWidget {
   const ButtonSetWallpaper({
     required this.content,
-    required this.onTap,
+    this.onTap,
     super.key,
   });
 
   final Widget content;
-  final Future<void> Function() onTap;
+  final Future<void> Function()? onTap;
 
   @override
   Widget build(BuildContext context) {

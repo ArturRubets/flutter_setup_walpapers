@@ -76,10 +76,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
 
   final WallpaperRepository _wallpaperRepository;
 
-  FutureOr<void> _onFetched(
-    WallpapersFetched event,
-    Emitter<WallpapersState> emit,
-  ) {
+  FutureOr<void> _onFetched(_, __) {
     if (state.isCache) {
       add(const WallpapersFetchedFromCache());
     } else {
@@ -87,22 +84,18 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
   }
 
-  FutureOr<void> _onFetchedFromApi(
-    WallpapersFetchedFromApi event,
-    Emitter<WallpapersState> emit,
-  ) async {
+  FutureOr<void> _onFetchedFromApi(_, Emitter<WallpapersState> emit) async {
     if (state.hasReachedMax) {
       emit(state.copyWith(status: WallpapersScreenStatus.success));
+
       return;
     }
 
     try {
       final int currentPage;
-      if (state.status == WallpapersScreenStatus.initial) {
-        currentPage = state.currentPage;
-      } else {
-        currentPage = state.currentPage + 1;
-      }
+      currentPage = state.status == WallpapersScreenStatus.initial
+          ? state.currentPage
+          : state.currentPage + 1;
 
       final response =
           await _wallpaperRepository.getWallpaperFromApi(currentPage);
@@ -157,22 +150,18 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
   }
 
-  FutureOr<void> _onFetchedFromCache(
-    WallpapersFetchedFromCache event,
-    Emitter<WallpapersState> emit,
-  ) async {
+  FutureOr<void> _onFetchedFromCache(_, Emitter<WallpapersState> emit) async {
     if (state.hasReachedMax) {
       emit(state.copyWith(status: WallpapersScreenStatus.success));
+
       return;
     }
 
     try {
       final int currentPage;
-      if (state.status == WallpapersScreenStatus.initial) {
-        currentPage = state.currentPage;
-      } else {
-        currentPage = state.currentPage + 1;
-      }
+      currentPage = state.status == WallpapersScreenStatus.initial
+          ? state.currentPage
+          : state.currentPage + 1;
 
       final response =
           await _wallpaperRepository.getWallpapersFromStorage(currentPage);
@@ -211,10 +200,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     }
   }
 
-  FutureOr<void> _onFetchedRestart(
-    WallpapersFetchedRestart event,
-    Emitter<WallpapersState> emit,
-  ) async {
+  FutureOr<void> _onFetchedRestart(_, Emitter<WallpapersState> emit) async {
     emit(
       state.copyWith(
         currentPage: 1,
@@ -228,19 +214,13 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     add(const WallpapersFetchedFromApi());
   }
 
-  FutureOr<void> _onGridModeSwitched(
-    WallpaperGridModeSwitched event,
-    Emitter<WallpapersState> emit,
-  ) {
+  FutureOr<void> _onGridModeSwitched(_, Emitter<WallpapersState> emit) {
     if (state.displayMode == WallpaperDisplayMode.list) {
       emit(state.copyWith(displayMode: WallpaperDisplayMode.grid));
     }
   }
 
-  FutureOr<void> _onListModeSwitched(
-    WallpaperListModeSwitched event,
-    Emitter<WallpapersState> emit,
-  ) {
+  FutureOr<void> _onListModeSwitched(_, Emitter<WallpapersState> emit) {
     if (state.displayMode == WallpaperDisplayMode.grid) {
       emit(state.copyWith(displayMode: WallpaperDisplayMode.list));
     }
@@ -424,6 +404,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     final thumbs = copyList[index].thumbs.copyWith(thumbSmall: thumbSmall);
 
     copyList[index] = copyList[index].copyWith(thumbs: thumbs);
+
     return copyList;
   }
 
@@ -441,6 +422,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     final thumbs = copyList[index].thumbs.copyWith(thumbOrigin: thumbOrigin);
 
     copyList[index] = copyList[index].copyWith(thumbs: thumbs);
+
     return copyList;
   }
 
@@ -455,6 +437,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     final mainImage = copyList[index].mainImage.copyWith(bytes: bytes);
 
     copyList[index] = copyList[index].copyWith(mainImage: mainImage);
+
     return copyList;
   }
 
@@ -472,6 +455,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
 
     final updatedWallpapersFromStorage =
         await _updateWallpapersFromStorage(wallpapers);
+
     return updatedWallpapersFromStorage;
   }
 
@@ -479,6 +463,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     WallpaperModelDomain wallpaper,
   ) {
     final w = wallpaper;
+
     return WallpaperModelBloc(
       id: w.id,
       favorites: w.favorites,
@@ -506,6 +491,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     WallpaperLocalStorage wallpaper,
   ) {
     final w = wallpaper;
+
     return WallpaperModelBloc(
       id: w.id,
       favorites: w.favorites,
@@ -540,6 +526,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
     final wallpapers = List<WallpaperModelBloc>.from(state.wallpapers);
     final index = _getIndex(wallpapers, wallpaper.id);
     wallpapers[index] = wallpaper;
+
     return wallpapers;
   }
 
@@ -560,6 +547,7 @@ class WallpapersBloc extends Bloc<WallpapersEvent, WallpapersState> {
         updated.add(element);
       }
     }
+
     return updated;
   }
 }

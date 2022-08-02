@@ -122,7 +122,7 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
         children: [
           Flexible(
             flex: 2,
-            child: item(
+            child: _Item(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -141,7 +141,7 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
           const SizedBox(width: 3),
           Flexible(
             flex: 3,
-            child: item(
+            child: _Item(
               Text(
                 category,
                 maxLines: 1,
@@ -153,8 +153,15 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget item(Widget content) {
+class _Item extends StatelessWidget {
+  const _Item(this.content);
+
+  final Widget content;
+
+  @override
+  Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: AppTextStyle.wallpaperGeneralInfo,
       child: Container(
@@ -186,14 +193,22 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
 
     return Row(
       children: [
-        item(AppImages.expand, resolution),
+        _SpecificationInfoItem(AppImages.expand, resolution),
         const SizedBox(width: 10),
-        item(AppImages.downloading, filesizeConverting),
+        _SpecificationInfoItem(AppImages.downloading, filesizeConverting),
       ],
     );
   }
+}
 
-  Widget item(String imageAsset, String description) {
+class _SpecificationInfoItem extends StatelessWidget {
+  const _SpecificationInfoItem(this.imageAsset, this.description);
+
+  final String imageAsset;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: Row(
         children: [

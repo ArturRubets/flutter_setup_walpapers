@@ -32,20 +32,24 @@ String filesizeConvert(int size, [int round = 2]) {
   if (size < divider * divider * divider * divider * divider &&
       size % divider == 0) {
     final r = size / divider / divider / divider / divider;
+
     return '${r.toStringAsFixed(0)} TB';
   }
 
   if (size < divider * divider * divider * divider * divider) {
     final r = size / divider / divider / divider / divider;
+
     return '${r.toStringAsFixed(round)} TB';
   }
 
   if (size < divider * divider * divider * divider * divider * divider &&
       size % divider == 0) {
     final r = size / divider / divider / divider / divider / divider;
+
     return '${r.toStringAsFixed(0)} PB';
   } else {
     final r = size / divider / divider / divider / divider / divider;
+
     return '${r.toStringAsFixed(round)} PB';
   }
 }

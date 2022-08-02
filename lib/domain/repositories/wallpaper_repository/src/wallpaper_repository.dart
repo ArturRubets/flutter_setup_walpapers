@@ -73,6 +73,7 @@ class WallpaperRepository {
   }) async {
     try {
       final imagesBytes = await _getImagesBytes(wallpaper);
+
       return _localStorageWallpapers.save(
         WallpaperLocalStorage(
           id: wallpaper.id,
@@ -95,14 +96,12 @@ class WallpaperRepository {
     }
   }
 
-  Future<bool> setWallpaper(
-    String path, [
-    int location = 1,
-  ]) async {
+  Future<bool> setWallpaper(String path) async {
     try {
-      // ignore: unused_local_variable
+      // ignore: no-empty-block, unused_local_variable
       await for (final value in Wallpaper.imageDownloadProgress(path)) {}
       await Wallpaper.homeScreen();
+
       return true;
     } on Exception {
       return false;

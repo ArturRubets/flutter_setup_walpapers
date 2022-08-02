@@ -45,8 +45,10 @@ class WallhavenApiClient {
   Future<Uint8List?> imageFromNetworkInBytes(String path) async {
     try {
       final response = await http.get(Uri.parse(path));
+
       return response.bodyBytes;
     } on Exception catch (_) {}
+
     return null;
   }
 }

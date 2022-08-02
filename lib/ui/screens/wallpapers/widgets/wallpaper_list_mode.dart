@@ -53,6 +53,7 @@ class _Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wallpaperId = context.read<String>();
+
     return SizedBox(
       height: 42,
       child: BlocBuilder<WallpapersBloc, WallpapersState>(
@@ -76,11 +77,10 @@ class _Button extends StatelessWidget {
                 },
               );
             case WallpaperStatus.loading:
-              return ButtonSetWallpaper(
-                content: const Center(
+              return const ButtonSetWallpaper(
+                content: Center(
                   child: Loader(color: AppColors.white),
                 ),
-                onTap: () async {},
               );
             case WallpaperStatus.downloaded:
               return ButtonSetWallpaper(
@@ -96,11 +96,10 @@ class _Button extends StatelessWidget {
                 },
               );
             case WallpaperStatus.installedWallpaper:
-              return ButtonSetWallpaper(
-                content: const Center(
+              return const ButtonSetWallpaper(
+                content: Center(
                   child: Text('Installed as as wallpaper'),
                 ),
-                onTap: () async {},
               );
           }
         },
@@ -190,7 +189,7 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
         children: [
           Flexible(
             flex: 4,
-            child: item(
+            child: _GeneralInfoItem(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -209,7 +208,7 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
           const SizedBox(width: 3),
           Flexible(
             flex: 5,
-            child: item(
+            child: _GeneralInfoItem(
               Text(
                 category,
                 maxLines: 1,
@@ -221,8 +220,15 @@ class _WallpaperPhotoGeneralInfo extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget item(Widget content) {
+class _GeneralInfoItem extends StatelessWidget {
+  const _GeneralInfoItem(this.content);
+
+  final Widget content;
+
+  @override
+  Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: AppTextStyle.wallpaperGeneralInfo,
       child: Container(
@@ -260,14 +266,23 @@ class _WallpaperSpecificationInfo extends StatelessWidget {
       runSpacing: 10,
       spacing: 10,
       children: [
-        item(AppImages.expand, resolution),
-        item(AppImages.downloading, filesizeConverting),
-        if (createdAtFormat != null) item(AppImages.date, createdAtFormat),
+        _SpecificationInfoItem(AppImages.expand, resolution),
+        _SpecificationInfoItem(AppImages.downloading, filesizeConverting),
+        if (createdAtFormat != null)
+          _SpecificationInfoItem(AppImages.date, createdAtFormat),
       ],
     );
   }
+}
 
-  Widget item(String imageAsset, String description) {
+class _SpecificationInfoItem extends StatelessWidget {
+  const _SpecificationInfoItem(this.imageAsset, this.description);
+
+  final String imageAsset;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

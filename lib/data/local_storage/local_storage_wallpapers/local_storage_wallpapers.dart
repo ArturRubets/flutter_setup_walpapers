@@ -31,6 +31,7 @@ class LocalStorageWallpapers {
       valuesToSave,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
     return id != 0 ? wallpaperLocalStorage : null;
   }
 
@@ -85,9 +86,10 @@ class LocalStorageWallpapers {
             (listWallpapersJson[i]['isSetWallpaper'] as int) == 1 || false;
         final path = listWallpapersJson[i]['path'] as String;
 
-        final image = base64Decode(_getImageWallpaper(id)!);
-        final smallImage = base64Decode(_getSmallImageWallpaper(id)!);
-        final originalImage = base64Decode(_getOriginalImageWallpaper(id)!);
+        final image = base64Decode(_getImageWallpaper(id) ?? '');
+        final smallImage = base64Decode(_getSmallImageWallpaper(id) ?? '');
+        final originalImage =
+            base64Decode(_getOriginalImageWallpaper(id) ?? '');
 
         return WallpaperLocalStorage(
           favorites: favorites,

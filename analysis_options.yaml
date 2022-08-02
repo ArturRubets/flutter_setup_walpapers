@@ -2,11 +2,80 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
-    - lib/**/*.g.dart
+    # General generated files
+    - '**/*.g.dart'
+    - '**/*.gr.dart'
+
+    # Flutter
+    - lib/generated_plugin_registrant.dart
+
+    # mockito
+    - '*.mocks.dart'
+    - '**/*.mocks.dart'
+
+    # freezed
+    - '**/*.freezed.dart'
+
+    # protobuf
+    - '**/*.pb.dart'
+
+    # test_coverage
+    - test/.test_coverage.dart
+
+    # Firebase generated file
+    - lib/firebase_options.dart
+
+  plugins:
+    - dart_code_metrics
+
   language:
     strict-casts: true
     strict-inference: true
     strict-raw-types: true
+
+dart_code_metrics:
+  metrics:
+    # NIST 500-235 item 2.5
+    cyclomatic-complexity: 10
+
+    # McConnell, S. (2004), Chapter 7.5: High-Quality Routines: How To Use Routine Parameters. Code Complete, Second Edition, Redmond, WA, USA: Microsoft Press. 174-180
+    number-of-parameters: 7
+
+    # McConnell, S. (2004), Chapter 7.4: High-Quality Routines: How Long Can a Routine Be?. Code Complete, Second Edition, Redmond, WA, USA: Microsoft Press. 173-174
+    source-lines-of-code: 200
+
+  rules:
+    - avoid-global-state
+    # - avoid-late-keyword
+    - avoid-non-null-assertion
+    - avoid-returning-widgets
+    - avoid-unnecessary-setstate
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unrelated-type-assertions
+    - avoid-unused-parameters
+    - avoid-wrapping-in-padding
+    - binary-expression-operand-order
+    - double-literal-format
+    - format-comment
+    - member-ordering-extended:
+        order:
+          - constructors
+          - public-fields
+          - private-fields
+          - getters-setters
+          - methods
+    - newline-before-return
+    - no-empty-block
+    - no-equal-then-else
+    # - no-magic-number
+    - prefer-conditional-expressions
+    - prefer-first
+    - prefer-last
+    # - prefer-match-file-name
+  anti-patterns:
+    - long-method
+    - long-parameter-list
 
 linter:
   rules:
